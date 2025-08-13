@@ -75,10 +75,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const storedUser = localStorage.getItem('auth_user');
     const storedTenant = localStorage.getItem('auth_tenant');
 
-    if (storedToken && storedUser) {
-      setUser(JSON.parse(storedUser));
-      if (storedTenant) {
-        setTenant(JSON.parse(storedTenant));
+    if (storedToken && storedUser && storedUser !== 'undefined') {
+      try {
+        setUser(JSON.parse(storedUser));
+        if (storedTenant && storedTenant !== 'undefined') {
+          setTenant(JSON.parse(storedTenant));
+        }
+      } catch (error) {
+        console.error('Error parsing stored auth data:', error);
+        // Clear invalid data
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        localStorage.removeItem('auth_tenant');
       }
     }
     setIsLoading(false);
