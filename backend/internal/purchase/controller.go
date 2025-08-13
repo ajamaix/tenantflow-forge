@@ -1,10 +1,9 @@
 package purchase
 
 import (
-	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/your-app/backend/models"
 )
 
@@ -17,69 +16,93 @@ func NewController(service Service) *Controller {
 }
 
 // CreatePurchase creates a new purchase
-func (c *Controller) CreatePurchase(ctx *gin.Context) {
-	userID := ctx.GetInt("user_id")
-	tenantID := ctx.GetInt("tenant_id")
+func (c *Controller) CreatePurchase(ctx *fiber.Ctx) error {
+	userID := ctx.Locals("user_id").(int)
+	tenantID := ctx.Locals("tenant_id").(int)
 
 	var req models.CreatePurchaseRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": true, "message": err.Error()})
-		return
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
 	}
 
 	purchase, err := c.service.CreatePurchase(userID, tenantID, req)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": err.Error()})
-		return
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"error": false, "data": purchase})
+	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"error": false,
+		"data":  purchase,
+	})
 }
 
 // GetUserPurchases gets all purchases for the current user
-func (c *Controller) GetUserPurchases(ctx *gin.Context) {
-	userID := ctx.GetInt("user_id")
-	tenantID := ctx.GetInt("tenant_id")
+func (c *Controller) GetUserPurchases(ctx *fiber.Ctx) error {
+	userID := ctx.Locals("user_id").(int)
+	tenantID := ctx.Locals("tenant_id").(int)
 
 	purchases, err := c.service.GetUserPurchases(userID, tenantID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": err.Error()})
-		return
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"error": false, "data": purchases})
+	return ctx.JSON(fiber.Map{
+		"error": false,
+		"data":  purchases,
+	})
 }
 
 // GetPurchaseByID gets a specific purchase by ID
-func (c *Controller) GetPurchaseByID(ctx *gin.Context) {
-	userID := ctx.GetInt("user_id")
-	tenantID := ctx.GetInt("tenant_id")
+func (c *Controller) GetPurchaseByID(ctx *fiber.Ctx) error {
+	userID := ctx.Locals("user_id").(int)
+	tenantID := ctx.Locals("tenant_id").(int)
 	
-	id, err := strconv.Atoi(ctx.Param("id"))
+	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": true, "message": "Invalid purchase ID"})
-		return
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": "Invalid purchase ID",
+		})
 	}
 
 	purchase, err := c.service.GetPurchaseByID(id, userID, tenantID)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": true, "message": err.Error()})
-		return
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"error": false, "data": purchase})
+	return ctx.JSON(fiber.Map{
+		"error": false,
+		"data":  purchase,
+	})
 }
 
 // GetActivePurchases gets all active purchases for the current user
-func (c *Controller) GetActivePurchases(ctx *gin.Context) {
-	userID := ctx.GetInt("user_id")
-	tenantID := ctx.GetInt("tenant_id")
+func (c *Controller) GetActivePurchases(ctx *fiber.Ctx) error {
+	userID := ctx.Locals("user_id").(int)
+	tenantID := ctx.Locals("tenant_id").(int)
 
 	purchases, err := c.service.GetActivePurchases(userID, tenantID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": err.Error()})
-		return
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"error": false, "data": purchases})
+	return ctx.JSON(fiber.Map{
+		"error": false,
+		"data":  purchases,
+	})
 }

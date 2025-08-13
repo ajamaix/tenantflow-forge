@@ -1,9 +1,7 @@
 package analytics
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 )
 
 type Controller struct {
@@ -15,27 +13,37 @@ func NewController(service Service) *Controller {
 }
 
 // GetDashboardMetrics gets dashboard metrics for the current tenant
-func (c *Controller) GetDashboardMetrics(ctx *gin.Context) {
-	tenantID := ctx.GetInt("tenant_id")
+func (c *Controller) GetDashboardMetrics(ctx *fiber.Ctx) error {
+	tenantID := ctx.Locals("tenant_id").(int)
 
 	metrics, err := c.service.GetDashboardMetrics(tenantID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": err.Error()})
-		return
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"error": false, "data": metrics})
+	return ctx.JSON(fiber.Map{
+		"error": false,
+		"data":  metrics,
+	})
 }
 
 // GetRecentActivity gets recent activity for the current tenant
-func (c *Controller) GetRecentActivity(ctx *gin.Context) {
-	tenantID := ctx.GetInt("tenant_id")
+func (c *Controller) GetRecentActivity(ctx *fiber.Ctx) error {
+	tenantID := ctx.Locals("tenant_id").(int)
 
 	activities, err := c.service.GetRecentActivity(tenantID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": err.Error()})
-		return
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"error": false, "data": activities})
+	return ctx.JSON(fiber.Map{
+		"error": false,
+		"data":  activities,
+	})
 }
