@@ -1,14 +1,14 @@
 package server
 
 import (
-	"backend/init"
+	appInit "backend/init"
 	"backend/internal/middleware"
 	"gorm.io/gorm"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupRoutes(router *fiber.App, app *init.App, db *gorm.DB) {
+func SetupRoutes(router *fiber.App, app *appInit.App, db *gorm.DB) {
 	// API version 1
 	api := router.Group("/api/v1")
 

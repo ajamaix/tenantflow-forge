@@ -1,21 +1,21 @@
-package handlers
+package auth
 
 import (
-	"backend/internal/services"
+	"backend/internal/domain"
 	"backend/models"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-type AuthHandler struct {
-	authService services.AuthService
+type Controller struct {
+	authService domain.AuthService
 }
 
-func NewAuthHandler(authService services.AuthService) *AuthHandler {
-	return &AuthHandler{authService: authService}
+func NewAuthController(authService domain.AuthService) *Controller {
+	return &Controller{authService: authService}
 }
 
-func (h *AuthHandler) Login(c *fiber.Ctx) error {
+func (h *Controller) Login(c *fiber.Ctx) error {
 	var req models.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -46,7 +46,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	})
 }
 
-func (h *AuthHandler) Register(c *fiber.Ctx) error {
+func (h *Controller) Register(c *fiber.Ctx) error {
 	var req models.RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -77,7 +77,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	})
 }
 
-func (h *AuthHandler) SuperAdminLogin(c *fiber.Ctx) error {
+func (h *Controller) SuperAdminLogin(c *fiber.Ctx) error {
 	var req models.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

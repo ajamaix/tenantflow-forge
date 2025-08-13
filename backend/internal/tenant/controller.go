@@ -1,22 +1,22 @@
-package handlers
+package tenant
 
 import (
-	"backend/internal/services"
+	"backend/internal/domain"
 	"backend/models"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-type TenantHandler struct {
-	tenantService services.TenantService
+type Controller struct {
+	tenantService domain.TenantService
 }
 
-func NewTenantHandler(tenantService services.TenantService) *TenantHandler {
-	return &TenantHandler{tenantService: tenantService}
+func NewTenantController(tenantService domain.TenantService) *Controller {
+	return &Controller{tenantService: tenantService}
 }
 
-func (h *TenantHandler) GetTenants(c *fiber.Ctx) error {
+func (h *Controller) GetTenants(c *fiber.Ctx) error {
 	tenants, err := h.tenantService.GetAllTenants()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -31,7 +31,7 @@ func (h *TenantHandler) GetTenants(c *fiber.Ctx) error {
 	})
 }
 
-func (h *TenantHandler) CreateTenant(c *fiber.Ctx) error {
+func (h *Controller) CreateTenant(c *fiber.Ctx) error {
 	var req models.CreateTenantRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -54,7 +54,7 @@ func (h *TenantHandler) CreateTenant(c *fiber.Ctx) error {
 	})
 }
 
-func (h *TenantHandler) GetTenant(c *fiber.Ctx) error {
+func (h *Controller) GetTenant(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -77,7 +77,7 @@ func (h *TenantHandler) GetTenant(c *fiber.Ctx) error {
 	})
 }
 
-func (h *TenantHandler) UpdateTenant(c *fiber.Ctx) error {
+func (h *Controller) UpdateTenant(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -108,7 +108,7 @@ func (h *TenantHandler) UpdateTenant(c *fiber.Ctx) error {
 	})
 }
 
-func (h *TenantHandler) DeleteTenant(c *fiber.Ctx) error {
+func (h *Controller) DeleteTenant(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

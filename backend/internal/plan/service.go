@@ -1,34 +1,24 @@
-package services
+package plan
 
 import (
+	"backend/internal/domain"
+	"backend/models"
 	"errors"
-
-	"saas-backend/internal/models"
-	"saas-backend/internal/repositories"
 )
 
-type PlanService interface {
-	CreatePlan(req models.CreatePlanRequest, productID int, tenantID int) (*models.Plan, error)
-	GetPlansByProduct(productID int, tenantID int) ([]models.Plan, error)
-	GetPlansByTenant(tenantID int) ([]models.Plan, error)
-	GetPlanByID(id int, tenantID int) (*models.Plan, error)
-	UpdatePlan(id int, req models.CreatePlanRequest, tenantID int) (*models.Plan, error)
-	DeletePlan(id int, tenantID int) error
+type Service struct {
+	planRepo    domain.PlanRepository
+	productRepo domain.ProductRepository
 }
 
-type planService struct {
-	planRepo    repositories.PlanRepository
-	productRepo repositories.ProductRepository
-}
-
-func NewPlanService(planRepo repositories.PlanRepository, productRepo repositories.ProductRepository) PlanService {
-	return &planService{
+func NewPlanService(planRepo domain.PlanRepository, productRepo domain.ProductRepository) *Service {
+	return &Service{
 		planRepo:    planRepo,
 		productRepo: productRepo,
 	}
 }
 
-func (s *planService) CreatePlan(req models.CreatePlanRequest, productID int, tenantID int) (*models.Plan, error) {
+func (s *Service) CreatePlan(req models.CreatePlanRequest, productID int, tenantID int) (*models.Plan, error) {
 	// Verify product exists and belongs to tenant
 	_, err := s.productRepo.GetByID(productID, tenantID)
 	if err != nil {
@@ -53,7 +43,7 @@ func (s *planService) CreatePlan(req models.CreatePlanRequest, productID int, te
 	return plan, nil
 }
 
-func (s *planService) GetPlansByProduct(productID int, tenantID int) ([]models.Plan, error) {
+func (s *Service) GetPlansByProduct(productID int, tenantID int) ([]models.Plan, error) {
 	// Verify product exists and belongs to tenant
 	_, err := s.productRepo.GetByID(productID, tenantID)
 	if err != nil {
@@ -63,11 +53,11 @@ func (s *planService) GetPlansByProduct(productID int, tenantID int) ([]models.P
 	return s.planRepo.GetByProduct(productID, tenantID)
 }
 
-func (s *planService) GetPlansByTenant(tenantID int) ([]models.Plan, error) {
+func (s *Service) GetPlansByTenant(tenantID int) ([]models.Plan, error) {
 	return s.planRepo.GetByTenant(tenantID)
 }
 
-func (s *planService) GetPlanByID(id int, tenantID int) (*models.Plan, error) {
+func (s *Service) GetPlanByID(id int, tenantID int) (*models.Plan, error) {
 	plan, err := s.planRepo.GetByID(id, tenantID)
 	if err != nil {
 		return nil, errors.New("plan not found")
@@ -75,7 +65,7 @@ func (s *planService) GetPlanByID(id int, tenantID int) (*models.Plan, error) {
 	return plan, nil
 }
 
-func (s *planService) UpdatePlan(id int, req models.CreatePlanRequest, tenantID int) (*models.Plan, error) {
+func (s *Service) UpdatePlan(id int, req models.CreatePlanRequest, tenantID int) (*models.Plan, error) {
 	plan, err := s.planRepo.GetByID(id, tenantID)
 	if err != nil {
 		return nil, errors.New("plan not found")
@@ -95,7 +85,7 @@ func (s *planService) UpdatePlan(id int, req models.CreatePlanRequest, tenantID 
 	return plan, nil
 }
 
-func (s *planService) DeletePlan(id int, tenantID int) error {
+func (s *Service) DeletePlan(id int, tenantID int) error {
 	// Check if plan exists
 	_, err := s.planRepo.GetByID(id, tenantID)
 	if err != nil {

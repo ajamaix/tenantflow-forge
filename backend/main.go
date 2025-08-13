@@ -10,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 
 	"backend/core"
-	"backend/init"
+	appInit "backend/init"
 	"backend/migrations"
 	"backend/server"
 )
@@ -60,7 +60,7 @@ func main() {
 	}))
 
 	// Initialize application
-	application, cleanup, err := init.InitializeApp(db, cfg)
+	application, cleanup, err := appInit.InitializeApp(db, cfg)
 	if err != nil {
 		log.Fatal("Failed to initialize application:", err)
 	}
@@ -72,7 +72,7 @@ func main() {
 	// Health check
 	fiberApp.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
-			"status": "healthy",
+			"status":  "healthy",
 			"service": "saas-backend",
 		})
 	})

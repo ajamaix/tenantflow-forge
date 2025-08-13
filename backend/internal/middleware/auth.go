@@ -1,12 +1,12 @@
 package middleware
 
 import (
+	"backend/core"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"saas-backend/internal/config"
 )
 
 type JWTClaims struct {
@@ -17,7 +17,7 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-func JWTAuth(cfg *config.Config) fiber.Handler {
+func JWTAuth(cfg *core.Config) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
@@ -28,7 +28,7 @@ func JWTAuth(cfg *config.Config) fiber.Handler {
 		}
 
 		tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
-		
+
 		token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(cfg.JWTSecret), nil
 		})
@@ -55,7 +55,7 @@ func JWTAuth(cfg *config.Config) fiber.Handler {
 	}
 }
 
-func SuperAdminAuth(cfg *config.Config) fiber.Handler {
+func SuperAdminAuth(cfg *core.Config) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
@@ -66,7 +66,7 @@ func SuperAdminAuth(cfg *config.Config) fiber.Handler {
 		}
 
 		tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
-		
+
 		token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(cfg.SuperJWTSecret), nil
 		})
@@ -102,7 +102,7 @@ func SuperAdminAuth(cfg *config.Config) fiber.Handler {
 func RequireRole(roles ...string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		userRole := c.Locals("role").(string)
-		
+
 		for _, role := range roles {
 			if userRole == role {
 				return c.Next()

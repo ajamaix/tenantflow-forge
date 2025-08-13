@@ -1,25 +1,25 @@
-package handlers
+package product
 
 import (
-	"backend/internal/services"
+	"backend/internal/domain"
 	"backend/models"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-type PlanHandler struct {
-	planService services.PlanService
+type Controller struct {
+	productService domain.ProductService
 }
 
-func NewPlanHandler(planService services.PlanService) *PlanHandler {
-	return &PlanHandler{planService: planService}
+func NewProductController(productService domain.ProductService) *Controller {
+	return &Controller{productService: productService}
 }
 
-func (h *PlanHandler) GetPlans(c *fiber.Ctx) error {
+func (h *Controller) GetProducts(c *fiber.Ctx) error {
 	tenantID := c.Locals("tenantID").(int)
 
-	plans, err := h.planService.GetPlansByTenant(tenantID)
+	products, err := h.productService.GetProductsByTenant(tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -29,22 +29,14 @@ func (h *PlanHandler) GetPlans(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"error": false,
-		"data":  plans,
+		"data":  products,
 	})
 }
 
-func (h *PlanHandler) CreatePlan(c *fiber.Ctx) error {
+func (h *Controller) CreateProduct(c *fiber.Ctx) error {
 	tenantID := c.Locals("tenantID").(int)
-	
-	productID, err := strconv.Atoi(c.Params("product_id"))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": "Invalid product ID",
-		})
-	}
 
-	var req models.CreatePlanRequest
+	var req models.CreateProductRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -52,7 +44,7 @@ func (h *PlanHandler) CreatePlan(c *fiber.Ctx) error {
 		})
 	}
 
-	plan, err := h.planService.CreatePlan(req, productID, tenantID)
+	product, err := h.productService.CreateProduct(req, tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -62,22 +54,22 @@ func (h *PlanHandler) CreatePlan(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"error": false,
-		"data":  plan,
+		"data":  product,
 	})
 }
 
-func (h *PlanHandler) GetPlan(c *fiber.Ctx) error {
+func (h *Controller) GetProduct(c *fiber.Ctx) error {
 	tenantID := c.Locals("tenantID").(int)
-	
+
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
-			"message": "Invalid plan ID",
+			"message": "Invalid product ID",
 		})
 	}
 
-	plan, err := h.planService.GetPlanByID(id, tenantID)
+	product, err := h.productService.GetProductByID(id, tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -87,22 +79,22 @@ func (h *PlanHandler) GetPlan(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"error": false,
-		"data":  plan,
+		"data":  product,
 	})
 }
 
-func (h *PlanHandler) UpdatePlan(c *fiber.Ctx) error {
+func (h *Controller) UpdateProduct(c *fiber.Ctx) error {
 	tenantID := c.Locals("tenantID").(int)
-	
+
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
-			"message": "Invalid plan ID",
+			"message": "Invalid product ID",
 		})
 	}
 
-	var req models.CreatePlanRequest
+	var req models.CreateProductRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -110,7 +102,7 @@ func (h *PlanHandler) UpdatePlan(c *fiber.Ctx) error {
 		})
 	}
 
-	plan, err := h.planService.UpdatePlan(id, req, tenantID)
+	product, err := h.productService.UpdateProduct(id, req, tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -120,22 +112,22 @@ func (h *PlanHandler) UpdatePlan(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"error": false,
-		"data":  plan,
+		"data":  product,
 	})
 }
 
-func (h *PlanHandler) DeletePlan(c *fiber.Ctx) error {
+func (h *Controller) DeleteProduct(c *fiber.Ctx) error {
 	tenantID := c.Locals("tenantID").(int)
-	
+
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
-			"message": "Invalid plan ID",
+			"message": "Invalid product ID",
 		})
 	}
 
-	err = h.planService.DeletePlan(id, tenantID)
+	err = h.productService.DeleteProduct(id, tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -145,6 +137,6 @@ func (h *PlanHandler) DeletePlan(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"error":   false,
-		"message": "Plan deleted successfully",
+		"message": "Product deleted successfully",
 	})
 }

@@ -2,40 +2,41 @@ package init
 
 import (
 	"backend/core"
-	"backend/internal/repositories"
-	"backend/internal/services"
-	"backend/internal/utils"
-	"backend/server/handlers"
+	"backend/core/email"
+	"backend/internal/auth"
+	"backend/internal/plan"
+	"backend/internal/product"
+	handlers2 "backend/internal/tenant"
 	"gorm.io/gorm"
 )
 
 type App struct {
-	AuthHandler    *handlers.AuthHandler
-	TenantHandler  *handlers.TenantHandler
-	ProductHandler *handlers.ProductHandler
-	PlanHandler    *handlers.PlanHandler
+	AuthHandler    *auth.Controller
+	TenantHandler  *handlers2.Controller
+	ProductHandler *product.Controller
+	PlanHandler    *plan.Controller
 	Config         *core.Config
 }
 
 func InitializeApp(db *gorm.DB, cfg *core.Config) (*App, func(), error) {
 	// Initialize repositories
-	userRepo := repositories.NewUserRepository(db)
-	tenantRepo := repositories.NewTenantRepository(db)
-	productRepo := repositories.NewProductRepository(db)
-	planRepo := repositories.NewPlanRepository(db)
+	userRepo := auth.NewUserRepository(db)
+	tenantRepo := handlers2.NewTenantRepository(db)
+	productRepo := product.NewProductRepository(db)
+	planRepo := plan.NewPlanRepository(db)
 
 	// Initialize services
-	emailService := utils.NewEmailService(cfg)
-	authService := services.NewAuthService(userRepo, cfg, emailService)
-	tenantService := services.NewTenantService(tenantRepo, userRepo)
-	productService := services.NewProductService(productRepo)
-	planService := services.NewPlanService(planRepo, productRepo)
+	emailService := email.NewEmailService(cfg)
+	authService := auth.NewAuthService(userRepo, cfg, emailService)
+	tenantService := handlers2.NewTenantService(tenantRepo, userRepo)
+	productService := product.NewProductService(productRepo)
+	planService := plan.NewPlanService(planRepo, productRepo)
 
 	// Initialize handlers
-	authHandler := handlers.NewAuthHandler(authService)
-	tenantHandler := handlers.NewTenantHandler(tenantService)
-	productHandler := handlers.NewProductHandler(productService)
-	planHandler := handlers.NewPlanHandler(planService)
+	authHandler := auth.NewAuthController(authService)
+	tenantHandler := handlers2.NewTenantController(tenantService)
+	productHandler := product.NewProductController(productService)
+	planHandler := plan.NewPlanController(planService)
 
 	app := &App{
 		AuthHandler:    authHandler,

@@ -1,33 +1,24 @@
-package services
+package tenant
 
 import (
+	"backend/internal/domain"
+	"backend/models"
 	"errors"
-
-	"saas-backend/internal/models"
-	"saas-backend/internal/repositories"
 )
 
-type TenantService interface {
-	CreateTenant(req models.CreateTenantRequest) (*models.Tenant, error)
-	GetAllTenants() ([]models.Tenant, error)
-	GetTenantByID(id int) (*models.Tenant, error)
-	UpdateTenant(id int, req models.CreateTenantRequest) (*models.Tenant, error)
-	DeleteTenant(id int) error
+type Service struct {
+	tenantRepo domain.TenantRepository
+	userRepo   domain.UserRepository
 }
 
-type tenantService struct {
-	tenantRepo repositories.TenantRepository
-	userRepo   repositories.UserRepository
-}
-
-func NewTenantService(tenantRepo repositories.TenantRepository, userRepo repositories.UserRepository) TenantService {
-	return &tenantService{
+func NewTenantService(tenantRepo domain.TenantRepository, userRepo domain.UserRepository) *Service {
+	return &Service{
 		tenantRepo: tenantRepo,
 		userRepo:   userRepo,
 	}
 }
 
-func (s *tenantService) CreateTenant(req models.CreateTenantRequest) (*models.Tenant, error) {
+func (s *Service) CreateTenant(req models.CreateTenantRequest) (*models.Tenant, error) {
 	// Check if tenant domain already exists
 	existingTenant, _ := s.tenantRepo.GetByDomain(req.TenantDomain)
 	if existingTenant != nil {
@@ -47,11 +38,11 @@ func (s *tenantService) CreateTenant(req models.CreateTenantRequest) (*models.Te
 	return tenant, nil
 }
 
-func (s *tenantService) GetAllTenants() ([]models.Tenant, error) {
+func (s *Service) GetAllTenants() ([]models.Tenant, error) {
 	return s.tenantRepo.GetAll()
 }
 
-func (s *tenantService) GetTenantByID(id int) (*models.Tenant, error) {
+func (s *Service) GetTenantByID(id int) (*models.Tenant, error) {
 	tenant, err := s.tenantRepo.GetByID(id)
 	if err != nil {
 		return nil, errors.New("tenant not found")
@@ -59,7 +50,7 @@ func (s *tenantService) GetTenantByID(id int) (*models.Tenant, error) {
 	return tenant, nil
 }
 
-func (s *tenantService) UpdateTenant(id int, req models.CreateTenantRequest) (*models.Tenant, error) {
+func (s *Service) UpdateTenant(id int, req models.CreateTenantRequest) (*models.Tenant, error) {
 	tenant, err := s.tenantRepo.GetByID(id)
 	if err != nil {
 		return nil, errors.New("tenant not found")
@@ -84,7 +75,7 @@ func (s *tenantService) UpdateTenant(id int, req models.CreateTenantRequest) (*m
 	return tenant, nil
 }
 
-func (s *tenantService) DeleteTenant(id int) error {
+func (s *Service) DeleteTenant(id int) error {
 	// Check if tenant exists
 	_, err := s.tenantRepo.GetByID(id)
 	if err != nil {

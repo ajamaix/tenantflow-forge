@@ -1,11 +1,11 @@
 package middleware
 
 import (
+	"backend/models"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
-	"saas-backend/internal/models"
 )
 
 func TenantMiddleware(db *gorm.DB) fiber.Handler {

@@ -1,38 +1,31 @@
-package services
+package auth
 
 import (
+	"backend/core"
+	coreDomain "backend/core/domain"
+	"backend/internal/domain"
+	"backend/internal/middleware"
+	"backend/models"
 	"errors"
 
 	"golang.org/x/crypto/bcrypt"
-	"saas-backend/internal/config"
-	"saas-backend/internal/middleware"
-	"saas-backend/internal/models"
-	"saas-backend/internal/repositories"
-	"saas-backend/internal/utils"
 )
 
-type AuthService interface {
-	Login(email, password string, tenantID *int, isSuperAdmin bool) (*models.AuthResponse, error)
-	Register(req models.RegisterRequest, tenantID *int) (*models.AuthResponse, error)
-	HashPassword(password string) (string, error)
-	ComparePassword(hashedPassword, password string) error
+type Service struct {
+	userRepo domain.UserRepository
+	cfg      *core.Config
+	email    coreDomain.EmailService
 }
 
-type authService struct {
-	userRepo repositories.UserRepository
-	cfg      *config.Config
-	email    utils.EmailService
-}
-
-func NewAuthService(userRepo repositories.UserRepository, cfg *config.Config, email utils.EmailService) AuthService {
-	return &authService{
+func NewAuthService(userRepo domain.UserRepository, cfg *core.Config, email coreDomain.EmailService) *Service {
+	return &Service{
 		userRepo: userRepo,
 		cfg:      cfg,
 		email:    email,
 	}
 }
 
-func (s *authService) Login(email, password string, tenantID *int, isSuperAdmin bool) (*models.AuthResponse, error) {
+func (s *Service) Login(email, password string, tenantID *int, isSuperAdmin bool) (*models.AuthResponse, error) {
 	var user *models.User
 	var err error
 
@@ -42,7 +35,7 @@ func (s *authService) Login(email, password string, tenantID *int, isSuperAdmin 
 		if err != nil {
 			return nil, errors.New("invalid credentials")
 		}
-		
+
 		if user.Role != "super_admin" {
 			return nil, errors.New("super admin access required")
 		}
@@ -52,7 +45,7 @@ func (s *authService) Login(email, password string, tenantID *int, isSuperAdmin 
 		if err != nil {
 			return nil, errors.New("invalid credentials")
 		}
-		
+
 		if user.TenantID == nil || *user.TenantID != *tenantID {
 			return nil, errors.New("invalid tenant")
 		}
@@ -82,7 +75,7 @@ func (s *authService) Login(email, password string, tenantID *int, isSuperAdmin 
 	}, nil
 }
 
-func (s *authService) Register(req models.RegisterRequest, tenantID *int) (*models.AuthResponse, error) {
+func (s *Service) Register(req models.RegisterRequest, tenantID *int) (*models.AuthResponse, error) {
 	// Check if user already exists
 	existingUser, _ := s.userRepo.GetByEmailAndTenant(req.Email, tenantID)
 	if existingUser != nil {
@@ -108,7 +101,7 @@ func (s *authService) Register(req models.RegisterRequest, tenantID *int) (*mode
 	}
 
 	// Send welcome email
-	go s.email.SendWelcomeEmail(user.Email, req.Name)
+	go s.email.SendWelcomeEmail(user.Email, req.FirstName)
 
 	// Generate JWT
 	token, err := middleware.GenerateJWT(user.ID, user.Email, user.Role, user.TenantID, s.cfg.JWTSecret)
@@ -122,11 +115,11 @@ func (s *authService) Register(req models.RegisterRequest, tenantID *int) (*mode
 	}, nil
 }
 
-func (s *authService) HashPassword(password string) (string, error) {
+func (s *Service) HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
 }
 
-func (s *authService) ComparePassword(hashedPassword, password string) error {
+func (s *Service) ComparePassword(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

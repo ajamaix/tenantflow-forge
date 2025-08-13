@@ -1,4 +1,4 @@
-package utils
+package jwt
 
 import (
 	"time"
@@ -43,5 +43,5 @@ func ValidateJWT(tokenString, secret string) (*JWTClaims, error) {
 		return claims, nil
 	}
 
-	return nil, jwt.ErrTokenInvalid
+	return nil, jwt.ErrInvalidKey
 }

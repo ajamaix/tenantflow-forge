@@ -1,28 +1,21 @@
-package utils
+package email
 
 import (
+	"backend/core"
 	"fmt"
-	"log"
-	"strconv"
-
 	"gopkg.in/gomail.v2"
-	"saas-backend/internal/config"
+	"log"
 )
 
-type EmailService interface {
-	SendWelcomeEmail(email, name string) error
-	SendPasswordResetEmail(email, resetToken string) error
+type Service struct {
+	cfg *core.Config
 }
 
-type emailService struct {
-	cfg *config.Config
+func NewEmailService(cfg *core.Config) *Service {
+	return &Service{cfg: cfg}
 }
 
-func NewEmailService(cfg *config.Config) EmailService {
-	return &emailService{cfg: cfg}
-}
-
-func (s *emailService) SendWelcomeEmail(email, name string) error {
+func (s *Service) SendWelcomeEmail(email, name string) error {
 	subject := "Welcome to SaaS Platform!"
 	body := fmt.Sprintf(`
 		<h1>Welcome %s!</h1>
@@ -35,7 +28,7 @@ func (s *emailService) SendWelcomeEmail(email, name string) error {
 	return s.sendEmail(email, subject, body)
 }
 
-func (s *emailService) SendPasswordResetEmail(email, resetToken string) error {
+func (s *Service) SendPasswordResetEmail(email, resetToken string) error {
 	subject := "Password Reset Request"
 	body := fmt.Sprintf(`
 		<h1>Password Reset Request</h1>
@@ -49,7 +42,7 @@ func (s *emailService) SendPasswordResetEmail(email, resetToken string) error {
 	return s.sendEmail(email, subject, body)
 }
 
-func (s *emailService) sendEmail(to, subject, body string) error {
+func (s *Service) sendEmail(to, subject, body string) error {
 	if !s.cfg.SendRealEmail {
 		// Log email instead of sending
 		log.Printf("EMAIL LOG - To: %s, Subject: %s, Body: %s", to, subject, body)
