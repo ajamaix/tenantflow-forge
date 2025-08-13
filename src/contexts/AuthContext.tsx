@@ -29,7 +29,7 @@ export const useAuth = () => {
 };
 
 // API configuration
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'https://669ed5b71fe5.ngrok-free.app/health';
 
 // Helper function to get tenant domain from hostname
 const getTenantDomain = () => {
