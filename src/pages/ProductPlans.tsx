@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Plus, 
   DollarSign, 
@@ -14,7 +15,12 @@ import {
   Settings, 
   ArrowLeft,
   Edit,
-  Trash2
+  Trash2,
+  ShoppingCart,
+  Upload,
+  ChevronDown,
+  ChevronUp,
+  Eye
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -26,14 +32,18 @@ interface Plan {
   description: string;
   price: number;
   features: Record<string, any>; // JSONB object from backend
-  active: boolean;
+  active?: boolean;
   product_id: number;
+  currency?: string;
+  interval?: string;
 }
 
 interface Product {
   id: number;
   name: string;
   description: string;
+  url?: string;
+  image?: string;
 }
 
 const ProductPlans: React.FC = () => {
@@ -45,6 +55,8 @@ const ProductPlans: React.FC = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+  const [expandedFeatures, setExpandedFeatures] = useState<{ [key: number]: boolean }>({});
   const [newPlan, setNewPlan] = useState({
     name: '',
     description: '',
@@ -116,6 +128,64 @@ const ProductPlans: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditPlan = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPlan) return;
+
+    try {
+      setLoading(true);
+      const featuresArray = editingPlan.features ? 
+        Object.values(editingPlan.features).filter(f => f && f.toString().trim()) :
+        [];
+      
+      await planApi.update(editingPlan.id, {
+        name: editingPlan.name,
+        description: editingPlan.description,
+        price: editingPlan.price,
+        currency: editingPlan.currency || 'USD',
+        interval: editingPlan.interval || 'month',
+        features: featuresArray.reduce((acc, feature, index) => {
+          acc[`feature_${index + 1}`] = feature;
+          return acc;
+        }, {} as Record<string, any>)
+      });
+
+      setEditingPlan(null);
+      await fetchProductAndPlans();
+
+      toast({
+        title: "Plan updated",
+        description: `${editingPlan.name} has been successfully updated.`,
+      });
+    } catch (error) {
+      console.error('Error updating plan:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update plan",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBuyPlan = (plan: Plan) => {
+    // Placeholder for purchase functionality
+    toast({
+      title: "Purchase Intent",
+      description: `Redirecting to purchase ${plan.name} for $${plan.price}`,
+    });
+    // Here you would integrate with a payment processor like Stripe
+    console.log('Purchasing plan:', plan);
+  };
+
+  const toggleFeatureExpansion = (planId: number) => {
+    setExpandedFeatures(prev => ({
+      ...prev,
+      [planId]: !prev[planId]
+    }));
   };
 
   const deletePlan = async (planId: number) => {
@@ -261,6 +331,85 @@ const ProductPlans: React.FC = () => {
           </Card>
         )}
 
+        {/* Edit Plan Dialog */}
+        {editingPlan && (
+          <Dialog open={!!editingPlan} onOpenChange={() => setEditingPlan(null)}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Edit Plan</DialogTitle>
+                <DialogDescription>
+                  Update the details for {editingPlan.name}
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleEditPlan} className="space-y-4">
+                <div>
+                  <Label htmlFor="edit_plan_name">Plan Name</Label>
+                  <Input
+                    id="edit_plan_name"
+                    value={editingPlan.name}
+                    onChange={(e) => setEditingPlan({...editingPlan, name: e.target.value})}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_plan_price">Price (USD)</Label>
+                  <Input
+                    id="edit_plan_price"
+                    type="number"
+                    step="0.01"
+                    value={editingPlan.price}
+                    onChange={(e) => setEditingPlan({...editingPlan, price: parseFloat(e.target.value)})}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_plan_description">Description</Label>
+                  <Textarea
+                    id="edit_plan_description"
+                    value={editingPlan.description}
+                    onChange={(e) => setEditingPlan({...editingPlan, description: e.target.value})}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_plan_features">Features (one per line)</Label>
+                  <Textarea
+                    id="edit_plan_features"
+                    value={editingPlan.features ? Object.values(editingPlan.features).join('\n') : ''}
+                    onChange={(e) => {
+                      const featuresArray = e.target.value.split('\n').filter(f => f.trim());
+                      const featuresObj = featuresArray.reduce((acc, feature, index) => {
+                        acc[`feature_${index + 1}`] = feature;
+                        return acc;
+                      }, {} as Record<string, any>);
+                      setEditingPlan({...editingPlan, features: featuresObj});
+                    }}
+                    className="min-h-[100px]"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  <Button type="submit" className="gradient-primary" disabled={loading}>
+                    {loading ? 'Updating...' : 'Update Plan'}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setEditingPlan(null)}
+                    disabled={loading}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
+
         {/* Plans Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {plans.length > 0 ? (
@@ -272,8 +421,8 @@ const ProductPlans: React.FC = () => {
                       <DollarSign className="w-5 h-5 mr-2" />
                       {plan.name}
                     </CardTitle>
-                    <Badge variant={plan.active ? "default" : "secondary"}>
-                      {plan.active ? "Active" : "Inactive"}
+                    <Badge variant={plan.active !== false ? "default" : "secondary"}>
+                      {plan.active !== false ? "Active" : "Inactive"}
                     </Badge>
                   </div>
                   <CardDescription>{plan.description}</CardDescription>
@@ -281,32 +430,64 @@ const ProductPlans: React.FC = () => {
                 <CardContent className="space-y-4">
                   <div className="text-2xl font-bold">
                     ${plan.price}
-                    <span className="text-sm font-normal text-muted-foreground">/month</span>
+                    <span className="text-sm font-normal text-muted-foreground">
+                      /{plan.interval || 'month'}
+                    </span>
                   </div>
                   <div className="space-y-2">
                     {plan.features && typeof plan.features === 'object' ? 
-                      Object.values(plan.features).map((feature, index) => (
+                      Object.values(plan.features).slice(0, expandedFeatures[plan.id] ? undefined : 3).map((feature, index) => (
                         <div key={index} className="flex items-center text-sm">
                           <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
                           {feature}
                         </div>
                       )) : null
                     }
+                    {plan.features && Object.values(plan.features).length > 3 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleFeatureExpansion(plan.id)}
+                        className="text-xs p-0 h-auto"
+                      >
+                        {expandedFeatures[plan.id] ? (
+                          <>
+                            <ChevronUp className="w-3 h-3 mr-1" />
+                            Show less
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="w-3 h-3 mr-1" />
+                            Show {Object.values(plan.features).length - 3} more
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      className="flex-1 gradient-primary"
+                      onClick={() => handleBuyPlan(plan)}
+                    >
+                      <ShoppingCart className="w-4 h-4 mr-2" />
+                      Buy Now
                     </Button>
                     <Button 
                       variant="outline" 
-                      size="sm" 
-                      className="flex-1"
+                      size="sm"
+                      onClick={() => setEditingPlan(plan)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
                       onClick={() => deletePlan(plan.id)}
                       disabled={loading}
                     >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </CardContent>

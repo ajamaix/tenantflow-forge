@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import ImageUpload from '@/components/ui/image-upload';
 import { 
   Package, 
   Plus, 
@@ -212,18 +213,13 @@ const Products: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="product_image">Product Image (Base64)</Label>
-                    <Textarea
-                      id="product_image"
-                      value={newProduct.image}
-                      onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
-                      placeholder="data:image/jpeg;base64,... or paste base64 string"
-                      className="min-h-[100px]"
-                      disabled={isLoading}
+                    <Label htmlFor="product_image">Product Image</Label>
+                    <ImageUpload
+                      onImageSelect={(base64) => setNewProduct({...newProduct, image: base64})}
+                      currentImage={newProduct.image}
+                      label=""
+                      className="mt-2"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Paste a base64 encoded image or data URL
-                    </p>
                   </div>
                   <div className="flex space-x-2">
                     <Button type="submit" className="gradient-primary" disabled={isLoading}>
