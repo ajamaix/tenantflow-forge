@@ -10,14 +10,24 @@ export const productApi = {
     return await apiRequest(`/api/v1/products/${id}`);
   },
   
-  create: async (data: { name: string; description: string }) => {
+  create: async (data: {
+    name: string;
+    description: string;
+    url?: string;
+    image?: string;
+  }) => {
     return await apiRequest('/api/v1/products', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
   
-  update: async (id: number, data: { name: string; description: string }) => {
+  update: async (id: number, data: {
+    name: string;
+    description: string;
+    url?: string;
+    image?: string;
+  }) => {
     return await apiRequest(`/api/v1/products/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -118,5 +128,3 @@ export const tenantApi = {
     });
   },
 };
-
-export { apiRequest };

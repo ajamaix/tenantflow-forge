@@ -33,6 +33,31 @@ func (h *Controller) GetPlans(c *fiber.Ctx) error {
 	})
 }
 
+func (h *Controller) GetPlansByProduct(c *fiber.Ctx) error {
+	tenantID := c.Locals("tenantID").(*int)
+
+	productID, err := strconv.Atoi(c.Params("product_id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
+			"message": "Invalid product ID",
+		})
+	}
+
+	plans, err := h.planService.GetPlansByProduct(productID, *tenantID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"error": false,
+		"data":  plans,
+	})
+}
+
 func (h *Controller) CreatePlan(c *fiber.Ctx) error {
 	tenantID := c.Locals("tenantID").(*int)
 

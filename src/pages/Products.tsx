@@ -22,6 +22,8 @@ interface Product {
   id: number;
   name: string;
   description: string;
+  url?: string;
+  image?: string; // Base64 encoded image
   plans?: any[];
   created_at: string;
   tenant_id: number;
@@ -35,7 +37,9 @@ const Products: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: '',
-    description: ''
+    description: '',
+    url: '',
+    image: ''
   });
 
   useEffect(() => {
@@ -66,9 +70,11 @@ const Products: React.FC = () => {
       await productApi.create({
         name: newProduct.name,
         description: newProduct.description,
+        url: newProduct.url,
+        image: newProduct.image,
       });
       
-      setNewProduct({ name: '', description: '' });
+      setNewProduct({ name: '', description: '', url: '', image: '' });
       setShowCreateForm(false);
       await loadProducts(); // Reload products
 
@@ -182,17 +188,42 @@ const Products: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="product_description">Description</Label>
-                      <Textarea
-                        id="product_description"
-                        value={newProduct.description}
-                        onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
-                        placeholder="Describe your product"
-                        className="min-h-[80px]"
-                        required
+                      <Label htmlFor="product_url">Product URL</Label>
+                      <Input
+                        id="product_url"
+                        type="url"
+                        value={newProduct.url}
+                        onChange={(e) => setNewProduct({...newProduct, url: e.target.value})}
+                        placeholder="https://example.com"
                         disabled={isLoading}
                       />
                     </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="product_description">Description</Label>
+                    <Textarea
+                      id="product_description"
+                      value={newProduct.description}
+                      onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                      placeholder="Describe your product"
+                      className="min-h-[80px]"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="product_image">Product Image (Base64)</Label>
+                    <Textarea
+                      id="product_image"
+                      value={newProduct.image}
+                      onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
+                      placeholder="data:image/jpeg;base64,... or paste base64 string"
+                      className="min-h-[100px]"
+                      disabled={isLoading}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Paste a base64 encoded image or data URL
+                    </p>
                   </div>
                   <div className="flex space-x-2">
                     <Button type="submit" className="gradient-primary" disabled={isLoading}>
@@ -226,18 +257,45 @@ const Products: React.FC = () => {
                   <Card key={product.id} className="metric-card">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
-                        <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
-                          <Package className="w-6 h-6 text-white" />
+                        <div className="flex items-center space-x-3">
+                          {product.image ? (
+                            <img 
+                              src={product.image} 
+                              alt={product.name}
+                              className="w-12 h-12 rounded-lg object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.nextElementSibling?.removeAttribute('hidden');
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className={`w-12 h-12 gradient-primary rounded-lg flex items-center justify-center ${product.image ? 'hidden' : ''}`}
+                          >
+                            <Package className="w-6 h-6 text-white" />
+                          </div>
                         </div>
                         <Badge variant="default">
                           active
                         </Badge>
                       </div>
                       
-                      <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                        {product.description}
-                      </p>
+                      <div className="space-y-2 mb-4">
+                        <h3 className="font-semibold text-lg">{product.name}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {product.description}
+                        </p>
+                        {product.url && (
+                          <a 
+                            href={product.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline block"
+                          >
+                            {product.url}
+                          </a>
+                        )}
+                      </div>
                       
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-2 text-sm text-muted-foreground">

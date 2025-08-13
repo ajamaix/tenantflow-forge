@@ -33,11 +33,14 @@ func SetupRoutes(router *fiber.App, app *appInit.App, db *gorm.DB) {
 	products.Get("/:id", app.ProductHandler.GetProduct)
 	products.Put("/:id", app.ProductHandler.UpdateProduct)
 	products.Delete("/:id", app.ProductHandler.DeleteProduct)
-
-	// Plan routes
+	
+	// Plan routes nested under products
+	products.Get("/:product_id/plans", app.PlanHandler.GetPlansByProduct)
+	products.Post("/:product_id/plans", app.PlanHandler.CreatePlan)
+	
+	// Plan routes for direct access
 	plans := protected.Group("/plans")
 	plans.Get("/", app.PlanHandler.GetPlans)
-	plans.Post("/products/:product_id/plans", app.PlanHandler.CreatePlan)
 	plans.Get("/:id", app.PlanHandler.GetPlan)
 	plans.Put("/:id", app.PlanHandler.UpdatePlan)
 	plans.Delete("/:id", app.PlanHandler.DeletePlan)

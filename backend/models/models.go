@@ -70,6 +70,8 @@ type Product struct {
 	ID          int       `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name        string    `json:"name" gorm:"not null"`
 	Description string    `json:"description"`
+	URL         string    `json:"url"`
+	Image       string    `json:"image" gorm:"type:text"` // Base64 encoded image
 	TenantID    int       `json:"tenant_id" gorm:"not null;index"`
 	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `json:"updated_at" gorm:"autoUpdateTime"`
@@ -153,6 +155,8 @@ type CreateTenantRequest struct {
 type CreateProductRequest struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description"`
+	URL         string `json:"url"`
+	Image       string `json:"image"` // Base64 encoded image
 }
 
 type CreatePlanRequest struct {
