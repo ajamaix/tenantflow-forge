@@ -28,44 +28,79 @@ export const useAuth = () => {
   return context;
 };
 
-// Mock API functions (replace with actual API calls)
-const mockApi = {
+// API configuration
+const API_BASE_URL = 'http://localhost:8080';
+
+// Helper function to get tenant domain from hostname
+const getTenantDomain = () => {
+  const hostname = window.location.hostname;
+  const parts = hostname.split('.');
+  return parts.length > 1 ? parts[0] : null;
+};
+
+// Helper function to make API requests
+const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const token = localStorage.getItem('auth_token');
+  
+  const defaultHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (token) {
+    defaultHeaders.Authorization = `Bearer ${token}`;
+  }
+  
+  // Add tenant domain header for tenant-specific requests
+  const tenantDomain = getTenantDomain();
+  if (tenantDomain && !endpoint.includes('/super')) {
+    defaultHeaders['X-Tenant-Domain'] = tenantDomain;
+  }
+  
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...defaultHeaders,
+      ...options.headers,
+    },
+  });
+  
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || `HTTP error! status: ${response.status}`);
+  }
+  
+  return data;
+};
+
+// Real API functions
+const api = {
   login: async (email: string, password: string, isSuperAdmin = false): Promise<{ user: User; token: string; tenant?: any }> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const endpoint = isSuperAdmin ? '/api/super-auth/login' : '/api/v1/auth/login';
+    const response = await apiRequest(endpoint, {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
     
-    if (isSuperAdmin) {
-      if (email === 'admin@saas.com' && password === 'admin123') {
-        return {
-          user: { id: '1', email, role: 'super_admin' },
-          token: 'mock-super-token'
-        };
-      }
-    } else {
-      if (email.includes('@') && password.length > 3) {
-        const tenantDomain = window.location.hostname.split('.')[0];
-        return {
-          user: { id: '2', email, role: 'admin', tenant_id: 1, tenant_name: 'Demo Company' },
-          token: 'mock-tenant-token',
-          tenant: { id: 1, name: 'Demo Company', domain: tenantDomain }
-        };
-      }
-    }
-    throw new Error('Invalid credentials');
+    return {
+      user: response.user,
+      token: response.token,
+      tenant: response.tenant,
+    };
   },
 
   register: async (email: string, password: string, name: string): Promise<{ user: User; token: string; tenant: any }> => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const response = await apiRequest('/api/v1/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, name }),
+    });
     
-    if (email.includes('@') && password.length > 3) {
-      const tenantDomain = window.location.hostname.split('.')[0];
-      return {
-        user: { id: '3', email, role: 'user', tenant_id: 1, tenant_name: 'Demo Company' },
-        token: 'mock-new-user-token',
-        tenant: { id: 1, name: 'Demo Company', domain: tenantDomain }
-      };
-    }
-    throw new Error('Registration failed');
+    return {
+      user: response.user,
+      token: response.token,
+      tenant: response.tenant,
+    };
   }
 };
 
@@ -97,7 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string, isSuperAdmin = false): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const response = await mockApi.login(email, password, isSuperAdmin);
+      const response = await api.login(email, password, isSuperAdmin);
       
       localStorage.setItem('auth_token', response.token);
       localStorage.setItem('auth_user', JSON.stringify(response.user));
@@ -130,7 +165,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (email: string, password: string, name: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const response = await mockApi.register(email, password, name);
+      const response = await api.register(email, password, name);
       
       localStorage.setItem('auth_token', response.token);
       localStorage.setItem('auth_user', JSON.stringify(response.user));
