@@ -1,32 +1,12 @@
-// API configuration
-const DEFAULT_API_PORT = '8080';
-const DEFAULT_API_PROTOCOL = 'http';
+import { appConfig } from './app';
 
-// Get tenant-aware API base URL
+// Get API base URL from config
 export const getApiBaseUrl = (): string => {
-  const hostname = window.location.hostname;
-  const parts = hostname.split('.');
-  
-  // Check if we have a subdomain (tenant)
-  if (parts.length > 1) {
-    const tenant = parts[0];
-    const domain = parts.slice(1).join('.');
-    
-    // For development, use localhost
-    if (domain.includes('localhost') || domain.includes('127.0.0.1')) {
-      return `${DEFAULT_API_PROTOCOL}://${tenant}.localhost:${DEFAULT_API_PORT}`;
-    }
-    
-    // For production domains like tenant1.amaix.tech -> tenant1.localhost:8085
-    return `${DEFAULT_API_PROTOCOL}://${tenant}.localhost:${DEFAULT_API_PORT}`;
-  }
-  
-  // Fallback to localhost without tenant
-  return `${DEFAULT_API_PROTOCOL}://localhost:${DEFAULT_API_PORT}`;
+  return appConfig.api.baseUrl;
 };
 
-// Helper function to get tenant domain from hostname
-export const getTenantDomain = (): string | null => {
+// Helper function to get tenant ID from hostname
+export const getTenantId = (): string | null => {
   const hostname = window.location.hostname;
   const parts = hostname.split('.');
   return parts.length > 1 ? parts[0] : null;
@@ -45,10 +25,10 @@ export const apiRequest = async (endpoint: string, options: RequestInit = {}) =>
     defaultHeaders.Authorization = `Bearer ${token}`;
   }
   
-  // Add tenant domain header for tenant-specific requests
-  const tenantDomain = getTenantDomain();
-  if (tenantDomain && !endpoint.includes('/super')) {
-    defaultHeaders['X-Tenant-Domain'] = tenantDomain;
+  // Add tenant ID header for tenant-specific requests
+  const tenantId = getTenantId();
+  if (tenantId && !endpoint.includes('/super')) {
+    defaultHeaders['X-Tenant-ID'] = tenantId;
   }
   
   const response = await fetch(url, {
