@@ -15,7 +15,7 @@ func NewController(service domain.AnalyticsService) *Controller {
 
 // GetDashboardMetrics gets dashboard metrics for the current tenant
 func (c *Controller) GetDashboardMetrics(ctx *fiber.Ctx) error {
-	tenantID := ctx.Locals("tenant_id").(*int)
+	tenantID := ctx.Locals("tenantID").(*int)
 
 	metrics, err := c.service.GetDashboardMetrics(*tenantID)
 	if err != nil {
@@ -33,7 +33,7 @@ func (c *Controller) GetDashboardMetrics(ctx *fiber.Ctx) error {
 
 // GetRecentActivity gets recent activity for the current tenant
 func (c *Controller) GetRecentActivity(ctx *fiber.Ctx) error {
-	tenantID := ctx.Locals("tenant_id").(*int)
+	tenantID := ctx.Locals("tenantID").(*int)
 
 	activities, err := c.service.GetRecentActivity(*tenantID)
 	if err != nil {

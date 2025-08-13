@@ -28,13 +28,17 @@ func InitializeApp(db *gorm.DB, cfg *core.Config) (*App, func(), error) {
 	tenantHandler := handlers2.NewControllerWire(db)
 	productHandler := product.NewControllerWire(db)
 	planHandler := plan.NewControllerWire(db)
+	purchaseHandler := purchase.NewControllerWire(db)
+	analyticsHandler := analytics.NewControllerWire(db)
 
 	app := &App{
-		AuthHandler:    authHandler,
-		TenantHandler:  tenantHandler,
-		ProductHandler: productHandler,
-		PlanHandler:    planHandler,
-		Config:         cfg,
+		AuthHandler:      authHandler,
+		TenantHandler:    tenantHandler,
+		ProductHandler:   productHandler,
+		PlanHandler:      planHandler,
+		PurchaseHandler:  purchaseHandler,
+		AnalyticsHandler: analyticsHandler,
+		Config:           cfg,
 	}
 
 	cleanup := func() {

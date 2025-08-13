@@ -18,8 +18,8 @@ func NewController(service domain.PurchaseService) *Controller {
 
 // CreatePurchase creates a new purchase
 func (c *Controller) CreatePurchase(ctx *fiber.Ctx) error {
-	userID := ctx.Locals("user_id").(*int)
-	tenantID := ctx.Locals("tenant_id").(*int)
+	userID := ctx.Locals("userID").(int)
+	tenantID := ctx.Locals("tenantID").(*int)
 
 	var req models.CreatePurchaseRequest
 	if err := ctx.BodyParser(&req); err != nil {
@@ -29,7 +29,7 @@ func (c *Controller) CreatePurchase(ctx *fiber.Ctx) error {
 		})
 	}
 
-	purchase, err := c.service.CreatePurchase(*userID, *tenantID, req)
+	purchase, err := c.service.CreatePurchase(userID, *tenantID, req)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -45,10 +45,10 @@ func (c *Controller) CreatePurchase(ctx *fiber.Ctx) error {
 
 // GetUserPurchases gets all purchases for the current user
 func (c *Controller) GetUserPurchases(ctx *fiber.Ctx) error {
-	userID := ctx.Locals("user_id").(*int)
-	tenantID := ctx.Locals("tenant_id").(*int)
+	userID := ctx.Locals("userID").(int)
+	tenantID := ctx.Locals("tenantID").(*int)
 
-	purchases, err := c.service.GetUserPurchases(*userID, *tenantID)
+	purchases, err := c.service.GetUserPurchases(userID, *tenantID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -64,8 +64,8 @@ func (c *Controller) GetUserPurchases(ctx *fiber.Ctx) error {
 
 // GetPurchaseByID gets a specific purchase by ID
 func (c *Controller) GetPurchaseByID(ctx *fiber.Ctx) error {
-	userID := ctx.Locals("user_id").(*int)
-	tenantID := ctx.Locals("tenant_id").(*int)
+	userID := ctx.Locals("userID").(int)
+	tenantID := ctx.Locals("tenantID").(*int)
 
 	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
@@ -75,7 +75,7 @@ func (c *Controller) GetPurchaseByID(ctx *fiber.Ctx) error {
 		})
 	}
 
-	purchase, err := c.service.GetPurchaseByID(id, *userID, *tenantID)
+	purchase, err := c.service.GetPurchaseByID(id, userID, *tenantID)
 	if err != nil {
 		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -91,10 +91,10 @@ func (c *Controller) GetPurchaseByID(ctx *fiber.Ctx) error {
 
 // GetActivePurchases gets all active purchases for the current user
 func (c *Controller) GetActivePurchases(ctx *fiber.Ctx) error {
-	userID := ctx.Locals("user_id").(*int)
-	tenantID := ctx.Locals("tenant_id").(*int)
+	userID := ctx.Locals("userID").(int)
+	tenantID := ctx.Locals("tenantID").(*int)
 
-	purchases, err := c.service.GetActivePurchases(*userID, *tenantID)
+	purchases, err := c.service.GetActivePurchases(userID, *tenantID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
