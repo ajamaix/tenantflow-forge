@@ -16,6 +16,7 @@ import Products from "@/pages/Products";
 import ProductPlans from "@/pages/ProductPlans";
 import Team from "@/pages/Team";
 import Analytics from "@/pages/Analytics";
+import ActivePlans from "@/pages/ActivePlans";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -103,6 +104,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Analytics />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/active-plans" 
+        element={
+          <ProtectedRoute>
+            <ActivePlans />
           </ProtectedRoute>
         } 
       />

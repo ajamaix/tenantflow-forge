@@ -83,21 +83,21 @@ const Dashboard: React.FC = () => {
     {
       title: 'Add New Product',
       description: 'Create a new product offering',
-      action: () => navigate('/products/new'),
+      action: () => navigate('/products'),
       icon: Package,
       color: 'bg-primary-light text-primary'
     },
     {
-      title: 'Create Pricing Plan',
-      description: 'Set up a new pricing strategy',
-      action: () => navigate('/plans/new'),
-      icon: CreditCard,
+      title: 'View Analytics',
+      description: 'Check your business performance',
+      action: () => navigate('/analytics'),
+      icon: TrendingUp,
       color: 'bg-accent-light text-accent'
     },
     {
-      title: 'Invite Team Member',
-      description: 'Add someone to your team',
-      action: () => navigate('/team/invite'),
+      title: 'Manage Team',
+      description: 'View and manage team members',
+      action: () => navigate('/team'),
       icon: Users,
       color: 'bg-success-light text-success'
     }
