@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/config/api';
 
 interface User {
   id: string;
@@ -26,52 +27,6 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
-
-// API configuration
-const API_BASE_URL = 'https://669ed5b71fe5.ngrok-free.app';
-
-// Helper function to get tenant domain from hostname
-const getTenantDomain = () => {
-  const hostname = window.location.hostname;
-  const parts = hostname.split('.');
-  return parts.length > 1 ? parts[0] : null;
-};
-
-// Helper function to make API requests
-const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const token = localStorage.getItem('auth_token');
-  
-  const defaultHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (token) {
-    defaultHeaders.Authorization = `Bearer ${token}`;
-  }
-  
-  // Add tenant domain header for tenant-specific requests
-  const tenantDomain = getTenantDomain();
-  if (tenantDomain && !endpoint.includes('/super')) {
-    defaultHeaders['X-Tenant-Domain'] = tenantDomain;
-  }
-  
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...options.headers,
-    },
-  });
-  
-  const data = await response.json();
-  
-  if (!response.ok) {
-    throw new Error(data.message || `HTTP error! status: ${response.status}`);
-  }
-  
-  return data;
 };
 
 // Real API functions

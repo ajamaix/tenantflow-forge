@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 // Pages
 import LoginForm from "@/components/Auth/LoginForm";
 import RegisterForm from "@/components/Auth/RegisterForm";
+import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import SuperAdmin from "@/pages/SuperAdmin";
 import Products from "@/pages/Products";
@@ -50,15 +51,15 @@ const AppRoutes = () => {
       {/* Public routes */}
       <Route 
         path="/login" 
-        element={user ? <Navigate to="/dashboard" replace /> : <LoginForm />} 
+        element={user ? <Navigate to="/dashboard" replace /> : <Login />} 
       />
       <Route 
         path="/register" 
-        element={user ? <Navigate to="/dashboard" replace /> : <RegisterForm />} 
+        element={user ? <Navigate to="/dashboard" replace /> : <div className="min-h-screen flex items-center justify-center bg-background"><div className="w-full max-w-md"><RegisterForm /></div></div>} 
       />
       <Route 
         path="/super-admin/login" 
-        element={user ? <Navigate to="/super-admin" replace /> : <LoginForm isSuperAdmin={true} />} 
+        element={user ? <Navigate to="/super-admin" replace /> : <div className="min-h-screen flex items-center justify-center bg-background"><div className="w-full max-w-md"><LoginForm isSuperAdmin={true} /></div></div>} 
       />
 
       {/* Protected routes */}
