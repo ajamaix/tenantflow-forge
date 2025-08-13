@@ -17,9 +17,9 @@ func NewPlanController(planService domain.PlanService) *Controller {
 }
 
 func (h *Controller) GetPlans(c *fiber.Ctx) error {
-	tenantID := c.Locals("tenantID").(int)
+	tenantID := c.Locals("tenantID").(*int)
 
-	plans, err := h.planService.GetPlansByTenant(tenantID)
+	plans, err := h.planService.GetPlansByTenant(*tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -34,7 +34,7 @@ func (h *Controller) GetPlans(c *fiber.Ctx) error {
 }
 
 func (h *Controller) CreatePlan(c *fiber.Ctx) error {
-	tenantID := c.Locals("tenantID").(int)
+	tenantID := c.Locals("tenantID").(*int)
 
 	productID, err := strconv.Atoi(c.Params("product_id"))
 	if err != nil {
@@ -52,7 +52,7 @@ func (h *Controller) CreatePlan(c *fiber.Ctx) error {
 		})
 	}
 
-	plan, err := h.planService.CreatePlan(req, productID, tenantID)
+	plan, err := h.planService.CreatePlan(req, productID, *tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -67,7 +67,7 @@ func (h *Controller) CreatePlan(c *fiber.Ctx) error {
 }
 
 func (h *Controller) GetPlan(c *fiber.Ctx) error {
-	tenantID := c.Locals("tenantID").(int)
+	tenantID := c.Locals("tenantID").(*int)
 
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -77,7 +77,7 @@ func (h *Controller) GetPlan(c *fiber.Ctx) error {
 		})
 	}
 
-	plan, err := h.planService.GetPlanByID(id, tenantID)
+	plan, err := h.planService.GetPlanByID(id, *tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -92,7 +92,7 @@ func (h *Controller) GetPlan(c *fiber.Ctx) error {
 }
 
 func (h *Controller) UpdatePlan(c *fiber.Ctx) error {
-	tenantID := c.Locals("tenantID").(int)
+	tenantID := c.Locals("tenantID").(*int)
 
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -110,7 +110,7 @@ func (h *Controller) UpdatePlan(c *fiber.Ctx) error {
 		})
 	}
 
-	plan, err := h.planService.UpdatePlan(id, req, tenantID)
+	plan, err := h.planService.UpdatePlan(id, req, *tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -125,7 +125,7 @@ func (h *Controller) UpdatePlan(c *fiber.Ctx) error {
 }
 
 func (h *Controller) DeletePlan(c *fiber.Ctx) error {
-	tenantID := c.Locals("tenantID").(int)
+	tenantID := c.Locals("tenantID").(*int)
 
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -135,7 +135,7 @@ func (h *Controller) DeletePlan(c *fiber.Ctx) error {
 		})
 	}
 
-	err = h.planService.DeletePlan(id, tenantID)
+	err = h.planService.DeletePlan(id, *tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
