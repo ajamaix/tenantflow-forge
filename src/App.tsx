@@ -13,6 +13,9 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import SuperAdmin from "@/pages/SuperAdmin";
 import Products from "@/pages/Products";
+import Plans from "@/pages/Plans";
+import Team from "@/pages/Team";
+import Analytics from "@/pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -91,6 +94,22 @@ const AppRoutes = () => {
         path="/plans" 
         element={
           <ProtectedRoute>
+            <Plans />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/plans/new" 
+        element={
+          <ProtectedRoute>
+            <Plans />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/products/new" 
+        element={
+          <ProtectedRoute>
             <Products />
           </ProtectedRoute>
         } 
@@ -99,7 +118,15 @@ const AppRoutes = () => {
         path="/team" 
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <Team />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/team/invite" 
+        element={
+          <ProtectedRoute>
+            <Team />
           </ProtectedRoute>
         } 
       />
@@ -107,7 +134,7 @@ const AppRoutes = () => {
         path="/analytics" 
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <Analytics />
           </ProtectedRoute>
         } 
       />
