@@ -17,9 +17,8 @@ func NewProductController(productService domain.ProductService) *Controller {
 }
 
 func (h *Controller) GetProducts(c *fiber.Ctx) error {
-	tenantID := c.Locals("tenantID").(int)
-
-	products, err := h.productService.GetProductsByTenant(tenantID)
+	tenantID := c.Locals("tenantID").(*int)
+	products, err := h.productService.GetProductsByTenant(*tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -34,7 +33,7 @@ func (h *Controller) GetProducts(c *fiber.Ctx) error {
 }
 
 func (h *Controller) CreateProduct(c *fiber.Ctx) error {
-	tenantID := c.Locals("tenantID").(int)
+	tenantID := c.Locals("tenantID").(*int)
 
 	var req models.CreateProductRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -44,7 +43,7 @@ func (h *Controller) CreateProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	product, err := h.productService.CreateProduct(req, tenantID)
+	product, err := h.productService.CreateProduct(req, *tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -59,7 +58,7 @@ func (h *Controller) CreateProduct(c *fiber.Ctx) error {
 }
 
 func (h *Controller) GetProduct(c *fiber.Ctx) error {
-	tenantID := c.Locals("tenantID").(int)
+	tenantID := c.Locals("tenantID").(*int)
 
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -69,7 +68,7 @@ func (h *Controller) GetProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	product, err := h.productService.GetProductByID(id, tenantID)
+	product, err := h.productService.GetProductByID(id, *tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error":   true,
@@ -84,7 +83,7 @@ func (h *Controller) GetProduct(c *fiber.Ctx) error {
 }
 
 func (h *Controller) UpdateProduct(c *fiber.Ctx) error {
-	tenantID := c.Locals("tenantID").(int)
+	tenantID := c.Locals("tenantID").(*int)
 
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -102,7 +101,7 @@ func (h *Controller) UpdateProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	product, err := h.productService.UpdateProduct(id, req, tenantID)
+	product, err := h.productService.UpdateProduct(id, req, *tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -117,7 +116,7 @@ func (h *Controller) UpdateProduct(c *fiber.Ctx) error {
 }
 
 func (h *Controller) DeleteProduct(c *fiber.Ctx) error {
-	tenantID := c.Locals("tenantID").(int)
+	tenantID := c.Locals("tenantID").(*int)
 
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -127,7 +126,7 @@ func (h *Controller) DeleteProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	err = h.productService.DeleteProduct(id, tenantID)
+	err = h.productService.DeleteProduct(id, *tenantID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
