@@ -25,7 +25,7 @@ interface Plan {
   name: string;
   description: string;
   price: number;
-  features: string[];
+  features: Record<string, any>; // JSONB object from backend
   active: boolean;
   product_id: number;
 }
@@ -284,12 +284,14 @@ const ProductPlans: React.FC = () => {
                     <span className="text-sm font-normal text-muted-foreground">/month</span>
                   </div>
                   <div className="space-y-2">
-                    {plan.features?.map((feature, index) => (
-                      <div key={index} className="flex items-center text-sm">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
-                        {feature}
-                      </div>
-                    ))}
+                    {plan.features && typeof plan.features === 'object' ? 
+                      Object.values(plan.features).map((feature, index) => (
+                        <div key={index} className="flex items-center text-sm">
+                          <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
+                          {feature}
+                        </div>
+                      )) : null
+                    }
                   </div>
                   <div className="flex space-x-2">
                     <Button variant="outline" size="sm" className="flex-1">
