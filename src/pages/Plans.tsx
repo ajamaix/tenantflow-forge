@@ -39,7 +39,7 @@ const Plans: React.FC = () => {
   };
 
   const handleCreatePlan = () => {
-    // This would typically open a modal or navigate to a form
+    // Navigate to create plan form
     console.log('Create new plan');
   };
 
