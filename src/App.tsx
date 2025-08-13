@@ -13,7 +13,7 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import SuperAdmin from "@/pages/SuperAdmin";
 import Products from "@/pages/Products";
-import Plans from "@/pages/Plans";
+import ProductPlans from "@/pages/ProductPlans";
 import Team from "@/pages/Team";
 import Analytics from "@/pages/Analytics";
 import NotFound from "./pages/NotFound";
@@ -83,47 +83,15 @@ const AppRoutes = () => {
         } 
       />
       <Route 
-        path="/products/:id/plans" 
+        path="/products/:productId/plans" 
         element={
           <ProtectedRoute>
-            <Products />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/plans" 
-        element={
-          <ProtectedRoute>
-            <Plans />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/plans/new" 
-        element={
-          <ProtectedRoute>
-            <Plans />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/products/new" 
-        element={
-          <ProtectedRoute>
-            <Products />
+            <ProductPlans />
           </ProtectedRoute>
         } 
       />
       <Route 
         path="/team" 
-        element={
-          <ProtectedRoute>
-            <Team />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/team/invite" 
         element={
           <ProtectedRoute>
             <Team />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,45 +8,74 @@ import {
   DollarSign, 
   Users, 
   ShoppingCart, 
-  Activity
+  Activity,
+  Package,
+  CreditCard
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { productApi, planApi } from '@/services/api';
 
 const Analytics: React.FC = () => {
   const { tenant } = useAuth();
+  const [products, setProducts] = useState([]);
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAnalyticsData();
+  }, []);
+
+  const fetchAnalyticsData = async () => {
+    try {
+      const [productsResponse, plansResponse] = await Promise.all([
+        productApi.getAll(),
+        planApi.getAll()
+      ]);
+      setProducts(productsResponse.data || []);
+      setPlans(plansResponse.data || []);
+    } catch (error) {
+      console.error('Error fetching analytics data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalRevenue = plans.reduce((sum: number, plan: any) => sum + (plan.price || 0), 0);
+  const activeProducts = products.length;
+  const activePlans = plans.filter((plan: any) => plan.active).length;
 
   const analyticsData = [
     {
-      title: 'Total Revenue',
-      value: '$24,500',
-      change: '+12%',
+      title: 'Total Products',
+      value: activeProducts.toString(),
+      change: products.length > 0 ? `${products.length} total` : 'No products',
+      trend: 'up',
+      icon: Package,
+      description: 'in catalog'
+    },
+    {
+      title: 'Active Plans',
+      value: activePlans.toString(),
+      change: `${plans.length} total plans`,
+      trend: 'up',
+      icon: CreditCard,
+      description: 'pricing options'
+    },
+    {
+      title: 'Plan Revenue',
+      value: `$${totalRevenue.toFixed(2)}`,
+      change: plans.length > 0 ? `${plans.length} plans` : 'No plans',
       trend: 'up',
       icon: DollarSign,
-      description: 'vs last month'
+      description: 'potential monthly'
     },
     {
-      title: 'New Customers',
-      value: '156',
-      change: '+8%',
-      trend: 'up',
-      icon: Users,
-      description: 'this month'
-    },
-    {
-      title: 'Total Orders',
-      value: '342',
-      change: '-3%',
-      trend: 'down',
-      icon: ShoppingCart,
-      description: 'vs last month'
-    },
-    {
-      title: 'Conversion Rate',
-      value: '3.2%',
-      change: '+0.5%',
+      title: 'Avg Plan Price',
+      value: plans.length > 0 ? `$${(totalRevenue / plans.length).toFixed(2)}` : '$0.00',
+      change: 'per plan',
       trend: 'up',
       icon: Activity,
-      description: 'vs last month'
+      description: 'average pricing'
     }
   ];
 
@@ -166,34 +195,36 @@ const Analytics: React.FC = () => {
           </Card>
         </div>
 
-        {/* Top Performers */}
+        {/* Current Plans */}
         <Card className="saas-card">
           <CardHeader>
-            <CardTitle>Top Performing Products</CardTitle>
+            <CardTitle>Current Pricing Plans</CardTitle>
             <CardDescription>
-              Your best selling products this month
+              Your active pricing plans across all products
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                { name: 'Premium Plan', sales: 156, revenue: '$15,600' },
-                { name: 'Basic Plan', sales: 89, revenue: '$8,900' },
-                { name: 'Enterprise Plan', sales: 23, revenue: '$23,000' }
-              ].map((product, index) => (
+              {plans.slice(0, 3).map((plan: any, index: number) => (
                 <div key={index} className="flex items-center justify-between p-4 border border-border rounded-lg">
                   <div>
-                    <h3 className="font-medium">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground">{product.sales} sales</p>
+                    <h3 className="font-medium">{plan.name || 'Unnamed Plan'}</h3>
+                    <p className="text-sm text-muted-foreground">{plan.description || 'No description'}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">{product.revenue}</p>
-                    <Badge variant="outline" className="text-xs">
-                      #{index + 1}
+                    <p className="font-semibold">${plan.price || 0}/month</p>
+                    <Badge variant={plan.active ? "default" : "outline"} className="text-xs">
+                      {plan.active ? 'Active' : 'Inactive'}
                     </Badge>
                   </div>
                 </div>
               ))}
+              {plans.length === 0 && (
+                <div className="text-center py-8">
+                  <CreditCard className="w-12 h-12 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-muted-foreground">No plans created yet</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

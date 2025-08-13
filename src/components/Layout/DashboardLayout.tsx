@@ -39,7 +39,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     : [
         { icon: Home, label: 'Dashboard', path: '/dashboard' },
         { icon: Package, label: 'Products', path: '/products' },
-        { icon: CreditCard, label: 'Pricing Plans', path: '/plans' },
         { icon: Users, label: 'Team', path: '/team' },
         { icon: BarChart3, label: 'Analytics', path: '/analytics' },
         { icon: Settings, label: 'Settings', path: '/settings' },
