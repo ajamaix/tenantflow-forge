@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ImageUpload from '@/components/ui/image-upload';
 import { 
   Package, 
@@ -25,6 +27,7 @@ interface Product {
   description: string;
   url?: string;
   image?: string; // Base64 encoded image
+  active?: boolean;
   plans?: any[];
   created_at: string;
   tenant_id: number;
@@ -36,11 +39,13 @@ const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newProduct, setNewProduct] = useState({
     name: '',
     description: '',
     url: '',
-    image: ''
+    image: '',
+    active: true
   });
 
   useEffect(() => {
@@ -73,9 +78,10 @@ const Products: React.FC = () => {
         description: newProduct.description,
         url: newProduct.url,
         image: newProduct.image,
+        active: newProduct.active,
       });
       
-      setNewProduct({ name: '', description: '', url: '', image: '' });
+      setNewProduct({ name: '', description: '', url: '', image: '', active: true });
       setShowCreateForm(false);
       await loadProducts(); // Reload products
 
@@ -107,6 +113,38 @@ const Products: React.FC = () => {
       toast({
         title: "Error",
         description: "Failed to delete product",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+    
+    try {
+      setIsLoading(true);
+      await productApi.update(editingProduct.id, {
+        name: editingProduct.name,
+        description: editingProduct.description,
+        url: editingProduct.url,
+        image: editingProduct.image,
+        active: editingProduct.active,
+      });
+      
+      setEditingProduct(null);
+      await loadProducts();
+
+      toast({
+        title: "Product updated",
+        description: `${editingProduct.name} has been successfully updated.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update product",
         variant: "destructive",
       });
     } finally {
@@ -221,6 +259,15 @@ const Products: React.FC = () => {
                       className="mt-2"
                     />
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="product_active"
+                      checked={newProduct.active}
+                      onCheckedChange={(checked) => setNewProduct({...newProduct, active: checked})}
+                      disabled={isLoading}
+                    />
+                    <Label htmlFor="product_active">Active Product</Label>
+                  </div>
                   <div className="flex space-x-2">
                     <Button type="submit" className="gradient-primary" disabled={isLoading}>
                       {isLoading ? 'Creating...' : 'Create Product'}
@@ -244,7 +291,90 @@ const Products: React.FC = () => {
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
                 <p className="text-muted-foreground mt-2">Loading products...</p>
               </div>
-            )}
+        )}
+
+        {/* Edit Product Dialog */}
+        {editingProduct && (
+          <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Edit Product</DialogTitle>
+                <DialogDescription>
+                  Update the details for {editingProduct.name}
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleEditProduct} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit_product_name">Product Name</Label>
+                    <Input
+                      id="edit_product_name"
+                      value={editingProduct.name}
+                      onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})}
+                      placeholder="Enter product name"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit_product_url">Product URL</Label>
+                    <Input
+                      id="edit_product_url"
+                      type="url"
+                      value={editingProduct.url || ''}
+                      onChange={(e) => setEditingProduct({...editingProduct, url: e.target.value})}
+                      placeholder="https://example.com"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="edit_product_description">Description</Label>
+                  <Textarea
+                    id="edit_product_description"
+                    value={editingProduct.description}
+                    onChange={(e) => setEditingProduct({...editingProduct, description: e.target.value})}
+                    placeholder="Describe your product"
+                    className="min-h-[80px]"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_product_image">Product Image</Label>
+                  <ImageUpload
+                    onImageSelect={(base64) => setEditingProduct({...editingProduct, image: base64})}
+                    currentImage={editingProduct.image}
+                    label=""
+                    className="mt-2"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="edit_product_active"
+                    checked={editingProduct.active !== false}
+                    onCheckedChange={(checked) => setEditingProduct({...editingProduct, active: checked})}
+                    disabled={isLoading}
+                  />
+                  <Label htmlFor="edit_product_active">Active Product</Label>
+                </div>
+                <div className="flex space-x-2">
+                  <Button type="submit" className="gradient-primary" disabled={isLoading}>
+                    {isLoading ? 'Updating...' : 'Update Product'}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setEditingProduct(null)}
+                    disabled={isLoading}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
 
             {/* Products Grid */}
             {!isLoading && (
@@ -271,8 +401,8 @@ const Products: React.FC = () => {
                             <Package className="w-6 h-6 text-white" />
                           </div>
                         </div>
-                        <Badge variant="default">
-                          active
+                        <Badge variant={product.active !== false ? "default" : "secondary"}>
+                          {product.active !== false ? "Active" : "Inactive"}
                         </Badge>
                       </div>
                       
@@ -313,7 +443,11 @@ const Products: React.FC = () => {
                           <Eye className="w-4 h-4 mr-1" />
                           View Plans
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => setEditingProduct(product)}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button 

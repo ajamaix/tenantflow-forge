@@ -387,9 +387,10 @@ const ProductPlans: React.FC = () => {
                       }, {} as Record<string, any>);
                       setEditingPlan({...editingPlan, features: featuresObj});
                     }}
-                    className="min-h-[100px]"
+                    className="min-h-[100px] whitespace-pre-wrap"
                     required
                     disabled={loading}
+                    style={{ whiteSpace: 'pre-wrap' }}
                   />
                 </div>
                 <div className="flex space-x-2">

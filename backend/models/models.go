@@ -72,6 +72,7 @@ type Product struct {
 	Description string    `json:"description"`
 	URL         string    `json:"url"`
 	Image       string    `json:"image" gorm:"type:text"` // Base64 encoded image
+	Active      *bool     `json:"active" gorm:"default:true"`
 	TenantID    int       `json:"tenant_id" gorm:"not null;index"`
 	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `json:"updated_at" gorm:"autoUpdateTime"`
@@ -157,6 +158,7 @@ type CreateProductRequest struct {
 	Description string `json:"description"`
 	URL         string `json:"url"`
 	Image       string `json:"image"` // Base64 encoded image
+	Active      *bool  `json:"active"`
 }
 
 type CreatePlanRequest struct {

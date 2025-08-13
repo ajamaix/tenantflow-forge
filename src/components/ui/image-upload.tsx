@@ -158,7 +158,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             disabled={loading}
           />
           <Label htmlFor="image-upload">
-            <Button variant="outline" className="cursor-pointer" disabled={loading}>
+            <Button 
+              variant="outline" 
+              className="cursor-pointer" 
+              disabled={loading}
+              type="button"
+            >
               Choose File
             </Button>
           </Label>

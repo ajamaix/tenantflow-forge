@@ -63,6 +63,7 @@ func (s *Service) CreateProduct(req models.CreateProductRequest, tenantID int) (
 		Description: req.Description,
 		URL:         req.URL,
 		Image:       encodedImage,
+		Active:      req.Active,
 		TenantID:    tenantID,
 	}
 
@@ -103,6 +104,9 @@ func (s *Service) UpdateProduct(id int, req models.CreateProductRequest, tenantI
 	product.Name = req.Name
 	product.Description = req.Description
 	product.URL = req.URL
+	if req.Active != nil {
+		product.Active = req.Active
+	}
 
 	if err := s.productRepo.Update(product); err != nil {
 		return nil, errors.New("failed to update product")

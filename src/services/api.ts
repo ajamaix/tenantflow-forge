@@ -15,6 +15,7 @@ export const productApi = {
     description: string;
     url?: string;
     image?: string;
+    active?: boolean;
   }) => {
     return await apiRequest('/api/v1/products', {
       method: 'POST',
@@ -27,6 +28,7 @@ export const productApi = {
     description: string;
     url?: string;
     image?: string;
+    active?: boolean;
   }) => {
     return await apiRequest(`/api/v1/products/${id}`, {
       method: 'PUT',
