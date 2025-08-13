@@ -39,9 +39,9 @@ const api = {
     });
     
     return {
-      user: response.user,
-      token: response.token,
-      tenant: response.tenant,
+      user: response.data?.user || response.user,
+      token: response.data?.token || response.token,
+      tenant: response.data?.tenant || response.tenant,
     };
   },
 
@@ -52,9 +52,9 @@ const api = {
     });
     
     return {
-      user: response.user,
-      token: response.token,
-      tenant: response.tenant,
+      user: response.data?.user || response.user,
+      token: response.data?.token || response.token,
+      tenant: response.data?.tenant || response.tenant,
     };
   }
 };
