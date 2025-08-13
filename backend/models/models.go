@@ -64,6 +64,7 @@ type User struct {
 	
 	// Relationships
 	Tenant *Tenant `json:"tenant,omitempty" gorm:"foreignKey:TenantID"`
+	Purchases []Purchase `json:"purchases,omitempty" gorm:"foreignKey:UserID"`
 }
 
 type Product struct {
@@ -100,6 +101,45 @@ type Plan struct {
 	// Relationships
 	Product *Product `json:"product,omitempty" gorm:"foreignKey:ProductID"`
 	Tenant  *Tenant  `json:"tenant,omitempty" gorm:"foreignKey:TenantID"`
+	Purchases []Purchase `json:"purchases,omitempty" gorm:"foreignKey:PlanID"`
+}
+
+// Purchase tracking models
+type Purchase struct {
+	ID            int       `json:"id" gorm:"primaryKey;autoIncrement"`
+	UserID        int       `json:"user_id" gorm:"not null;index"`
+	PlanID        int       `json:"plan_id" gorm:"not null;index"`
+	TransactionID string    `json:"transaction_id" gorm:"unique;not null"`
+	Amount        float64   `json:"amount" gorm:"not null"`
+	Currency      string    `json:"currency" gorm:"not null"`
+	Status        string    `json:"status" gorm:"default:'active'"` // active, expired, cancelled
+	PurchasedAt   time.Time `json:"purchased_at" gorm:"autoCreateTime"`
+	ExpiresAt     *time.Time `json:"expires_at"`
+	TenantID      int       `json:"tenant_id" gorm:"not null;index"`
+	CreatedAt     time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt     time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt     gorm.DeletedAt `json:"deleted_at,omitempty" gorm:"index"`
+	
+	// Relationships
+	User   *User   `json:"user,omitempty" gorm:"foreignKey:UserID"`
+	Plan   *Plan   `json:"plan,omitempty" gorm:"foreignKey:PlanID"`
+	Tenant *Tenant `json:"tenant,omitempty" gorm:"foreignKey:TenantID"`
+}
+
+// Activity tracking
+type Activity struct {
+	ID          int       `json:"id" gorm:"primaryKey;autoIncrement"`
+	UserID      int       `json:"user_id" gorm:"not null;index"`
+	TenantID    int       `json:"tenant_id" gorm:"not null;index"`
+	Type        string    `json:"type" gorm:"not null"` // product_created, plan_created, purchase_made, etc.
+	Description string    `json:"description" gorm:"not null"`
+	EntityType  string    `json:"entity_type"` // product, plan, purchase, user
+	EntityID    *int      `json:"entity_id"`
+	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
+	
+	// Relationships
+	User   *User   `json:"user,omitempty" gorm:"foreignKey:UserID"`
+	Tenant *Tenant `json:"tenant,omitempty" gorm:"foreignKey:TenantID"`
 }
 
 type Role struct {
@@ -168,4 +208,20 @@ type CreatePlanRequest struct {
 	Currency    string  `json:"currency"`
 	Interval    string  `json:"interval"`
 	Features    JSONB   `json:"features"`
+}
+
+type CreatePurchaseRequest struct {
+	PlanID        int    `json:"plan_id" validate:"required"`
+	TransactionID string `json:"transaction_id" validate:"required"`
+	PaymentMethod string `json:"payment_method" validate:"required"`
+}
+
+// Dashboard metrics DTOs
+type DashboardMetrics struct {
+	TotalProducts  int     `json:"total_products"`
+	ActivePlans    int     `json:"active_plans"`
+	TeamMembers    int     `json:"team_members"`
+	RevenueGrowth  float64 `json:"revenue_growth"`
+	TotalRevenue   float64 `json:"total_revenue"`
+	ActivePurchases int    `json:"active_purchases"`
 }

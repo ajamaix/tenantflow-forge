@@ -45,6 +45,18 @@ func SetupRoutes(router *fiber.App, app *appInit.App, db *gorm.DB) {
 	plans.Put("/:id", app.PlanHandler.UpdatePlan)
 	plans.Delete("/:id", app.PlanHandler.DeletePlan)
 
+	// Purchase routes
+	purchases := protected.Group("/purchases")
+	purchases.Post("/", app.PurchaseHandler.CreatePurchase)
+	purchases.Get("/", app.PurchaseHandler.GetUserPurchases)
+	purchases.Get("/active", app.PurchaseHandler.GetActivePurchases)
+	purchases.Get("/:id", app.PurchaseHandler.GetPurchaseByID)
+
+	// Analytics routes
+	analytics := protected.Group("/analytics")
+	analytics.Get("/dashboard", app.AnalyticsHandler.GetDashboardMetrics)
+	analytics.Get("/activity", app.AnalyticsHandler.GetRecentActivity)
+
 	// Super Admin routes
 	superAdmin := router.Group("/api/super")
 	superAuth := router.Group("/api/super-auth")

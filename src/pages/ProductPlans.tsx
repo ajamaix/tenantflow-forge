@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { planApi, productApi } from '@/services/api';
+import { planApi, productApi, purchaseApi } from '@/services/api';
 import { Package, Plus, Edit, Trash2, ArrowLeft, DollarSign, Users, Calendar, ChevronDown, ChevronUp, ShoppingCart, CreditCard } from 'lucide-react';
 import PurchaseDialog from '@/components/PurchaseDialog';
 import PurchasedPlansDialog from '@/components/PurchasedPlansDialog';
@@ -61,6 +61,7 @@ const ProductPlans: React.FC = () => {
   useEffect(() => {
     if (productId) {
       fetchProductAndPlans();
+      fetchPurchasedPlans();
     }
   }, [productId]);
 
@@ -92,6 +93,29 @@ const ProductPlans: React.FC = () => {
       setPlans(response.data || []);
     } catch (error) {
       console.error('Error fetching plans:', error);
+    }
+  };
+
+  const fetchPurchasedPlans = async () => {
+    try {
+      const response = await purchaseApi.getUserPurchases();
+      // Transform purchase data to match expected format
+      const transformedPurchases = (response.data || []).map((purchase: any) => ({
+        id: purchase.id,
+        planId: purchase.plan_id,
+        planName: purchase.plan?.name || 'Unknown Plan',
+        planDescription: purchase.plan?.description || '',
+        price: purchase.amount,
+        currency: purchase.currency,
+        interval: purchase.plan?.interval || 'monthly',
+        features: purchase.plan?.features || {},
+        transactionId: purchase.transaction_id,
+        purchasedAt: purchase.purchased_at,
+        status: purchase.status
+      }));
+      setPurchasedPlans(transformedPurchases);
+    } catch (error) {
+      console.error('Error fetching purchased plans:', error);
     }
   };
 
@@ -197,25 +221,9 @@ const ProductPlans: React.FC = () => {
   };
 
   const handlePurchaseComplete = (planId: number, transactionId: string) => {
-    const purchasedPlan = plans.find(p => p.id === planId);
-    if (purchasedPlan) {
-      const newPurchase = {
-        id: Date.now(),
-        planId,
-        planName: purchasedPlan.name,
-        planDescription: purchasedPlan.description,
-        price: purchasedPlan.price,
-        currency: purchasedPlan.currency,
-        interval: purchasedPlan.interval,
-        features: purchasedPlan.features,
-        transactionId,
-        purchasedAt: new Date().toISOString(),
-        status: 'active' as const
-      };
-      
-      setPurchasedPlans(prev => [...prev, newPurchase]);
-      setPurchaseDialogPlan(null);
-    }
+    // Refresh purchased plans after successful purchase
+    fetchPurchasedPlans();
+    setPurchaseDialogPlan(null);
   };
 
   const toggleFeatureExpansion = (planId: number) => {

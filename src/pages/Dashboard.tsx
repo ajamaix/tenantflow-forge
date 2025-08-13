@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { analyticsApi } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Package, 
   CreditCard, 
@@ -16,37 +18,66 @@ import { useNavigate } from 'react-router-dom';
 const Dashboard: React.FC = () => {
   const { user, tenant } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [metrics, setMetrics] = useState<any>(null);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const metrics = [
-    {
-      title: 'Total Products',
-      value: '12',
-      change: '+2 this month',
-      icon: Package,
-      color: 'text-primary'
-    },
-    {
-      title: 'Active Plans',
-      value: '24',
-      change: '+8 this month',
-      icon: CreditCard,
-      color: 'text-accent'
-    },
-    {
-      title: 'Team Members',
-      value: '6',
-      change: '+1 this month',
-      icon: Users,
-      color: 'text-success'
-    },
-    {
-      title: 'Revenue Growth',
-      value: '+15%',
-      change: 'vs last month',
-      icon: TrendingUp,
-      color: 'text-warning'
-    }
-  ];
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const [metricsResponse, activityResponse] = await Promise.all([
+          analyticsApi.getDashboardMetrics(),
+          analyticsApi.getRecentActivity()
+        ]);
+
+        const metricsData = metricsResponse.data;
+        setMetrics([
+          {
+            title: 'Total Products',
+            value: metricsData.total_products.toString(),
+            change: 'Active products',
+            icon: Package,
+            color: 'text-primary'
+          },
+          {
+            title: 'Active Plans',
+            value: metricsData.active_plans.toString(),
+            change: 'Available plans',
+            icon: CreditCard,
+            color: 'text-accent'
+          },
+          {
+            title: 'Team Members',
+            value: metricsData.team_members.toString(),
+            change: 'Total members',
+            icon: Users,
+            color: 'text-success'
+          },
+          {
+            title: 'Revenue Growth',
+            value: `${metricsData.revenue_growth >= 0 ? '+' : ''}${metricsData.revenue_growth.toFixed(1)}%`,
+            change: 'vs last month',
+            icon: TrendingUp,
+            color: 'text-warning'
+          }
+        ]);
+
+        setRecentActivity(activityResponse.data || []);
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard data",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [toast]);
 
   const quickActions = [
     {
@@ -96,29 +127,47 @@ const Dashboard: React.FC = () => {
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {metrics.map((metric, index) => {
-            const Icon = metric.icon;
-            return (
+          {loading ? (
+            // Loading skeleton
+            Array.from({ length: 4 }).map((_, index) => (
               <Card key={index} className="metric-card">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        {metric.title}
-                      </p>
-                      <p className="text-2xl font-bold">{metric.value}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {metric.change}
-                      </p>
+                    <div className="flex-1">
+                      <div className="h-4 bg-muted rounded mb-2"></div>
+                      <div className="h-8 bg-muted rounded mb-1"></div>
+                      <div className="h-3 bg-muted rounded w-2/3"></div>
                     </div>
-                    <div className={`p-3 rounded-lg ${metric.color} bg-opacity-10`}>
-                      <Icon className={`w-6 h-6 ${metric.color}`} />
-                    </div>
+                    <div className="w-12 h-12 bg-muted rounded-lg"></div>
                   </div>
                 </CardContent>
               </Card>
-            );
-          })}
+            ))
+          ) : metrics ? (
+            metrics.map((metric: any, index: number) => {
+              const Icon = metric.icon;
+              return (
+                <Card key={index} className="metric-card">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          {metric.title}
+                        </p>
+                        <p className="text-2xl font-bold">{metric.value}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {metric.change}
+                        </p>
+                      </div>
+                      <div className={`p-3 rounded-lg ${metric.color} bg-opacity-10`}>
+                        <Icon className={`w-6 h-6 ${metric.color}`} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          ) : null}
         </div>
 
         {/* Quick Actions */}
@@ -167,29 +216,43 @@ const Dashboard: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">New product "Premium Plan" created</p>
-                    <p className="text-xs text-muted-foreground">2 hours ago</p>
-                  </div>
+              {loading ? (
+                // Loading skeleton
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className="flex items-start space-x-3">
+                      <div className="w-2 h-2 bg-muted rounded-full mt-2"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-muted rounded mb-1"></div>
+                        <div className="h-3 bg-muted rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-accent rounded-full mt-2"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Pricing updated for "Basic Plan"</p>
-                    <p className="text-xs text-muted-foreground">1 day ago</p>
-                  </div>
+              ) : recentActivity.length > 0 ? (
+                <div className="space-y-3">
+                  {recentActivity.map((activity: any, index: number) => (
+                    <div key={index} className="flex items-start space-x-3">
+                      <div className={`w-2 h-2 rounded-full mt-2 ${
+                        activity.type === 'purchase_made' ? 'bg-primary' :
+                        activity.type === 'product_created' ? 'bg-accent' :
+                        activity.type === 'plan_created' ? 'bg-success' :
+                        'bg-muted-foreground'
+                      }`}></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{activity.description}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(activity.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-success rounded-full mt-2"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Team member invited</p>
-                    <p className="text-xs text-muted-foreground">3 days ago</p>
-                  </div>
+              ) : (
+                <div className="text-center text-muted-foreground py-4">
+                  No recent activity
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>

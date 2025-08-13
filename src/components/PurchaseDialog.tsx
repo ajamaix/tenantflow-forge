@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { purchaseApi } from '@/services/api';
 import { CreditCard, Smartphone, Check } from 'lucide-react';
 
 interface Plan {
@@ -48,11 +49,15 @@ const PurchaseDialog: React.FC<PurchaseDialogProps> = ({
 
     setLoading(true);
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Generate mock transaction ID
+      // Generate transaction ID
       const transactionId = `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Create purchase record
+      await purchaseApi.create({
+        plan_id: plan.id,
+        transaction_id: transactionId,
+        payment_method: paymentMethod,
+      });
       
       onPurchaseComplete(plan.id, transactionId);
       

@@ -17,6 +17,8 @@ func AutoMigrate(db *gorm.DB) error {
 		&models.User{},
 		&models.Product{},
 		&models.Plan{},
+		&models.Purchase{},
+		&models.Activity{},
 		&models.Role{},
 		&models.Permission{},
 		&models.RolePermission{},

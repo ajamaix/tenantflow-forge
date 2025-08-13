@@ -92,6 +92,43 @@ export const planApi = {
   },
 };
 
+// Purchase API functions
+export const purchaseApi = {
+  create: async (data: {
+    plan_id: number;
+    transaction_id: string;
+    payment_method: string;
+  }) => {
+    return await apiRequest('/api/v1/purchases', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  
+  getUserPurchases: async () => {
+    return await apiRequest('/api/v1/purchases');
+  },
+  
+  getActivePurchases: async () => {
+    return await apiRequest('/api/v1/purchases/active');
+  },
+  
+  getById: async (id: number) => {
+    return await apiRequest(`/api/v1/purchases/${id}`);
+  },
+};
+
+// Analytics API functions
+export const analyticsApi = {
+  getDashboardMetrics: async () => {
+    return await apiRequest('/api/v1/analytics/dashboard');
+  },
+  
+  getRecentActivity: async () => {
+    return await apiRequest('/api/v1/analytics/activity');
+  },
+};
+
 // Tenant API functions (Super Admin)
 export const tenantApi = {
   getAll: async () => {
