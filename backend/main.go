@@ -70,19 +70,15 @@ func main() {
 	server.SetupRoutes(fiberApp, application, db)
 
 	// Health check
-	fiberApp.Get("/health", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"status":  "healthy",
-			"service": "saas-backend",
-		})
-	})
-
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8085"
 	}
 
 	log.Printf("Server starting on port %s", port)
-	log.Fatal(fiberApp.Listen(":" + port))
+	err = fiberApp.Listen(":" + port)
+	if err != nil {
+		log.Fatal("Failed to start server:", err)
+	}
 }

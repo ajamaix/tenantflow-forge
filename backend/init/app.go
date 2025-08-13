@@ -2,7 +2,6 @@ package init
 
 import (
 	"backend/core"
-	"backend/core/email"
 	"backend/internal/auth"
 	"backend/internal/plan"
 	"backend/internal/product"
@@ -19,24 +18,12 @@ type App struct {
 }
 
 func InitializeApp(db *gorm.DB, cfg *core.Config) (*App, func(), error) {
-	// Initialize repositories
-	userRepo := auth.NewUserRepository(db)
-	tenantRepo := handlers2.NewTenantRepository(db)
-	productRepo := product.NewProductRepository(db)
-	planRepo := plan.NewPlanRepository(db)
-
-	// Initialize services
-	emailService := email.NewEmailService(cfg)
-	authService := auth.NewAuthService(userRepo, cfg, emailService)
-	tenantService := handlers2.NewTenantService(tenantRepo, userRepo)
-	productService := product.NewProductService(productRepo)
-	planService := plan.NewPlanService(planRepo, productRepo)
 
 	// Initialize handlers
-	authHandler := auth.NewAuthController(authService)
-	tenantHandler := handlers2.NewTenantController(tenantService)
-	productHandler := product.NewProductController(productService)
-	planHandler := plan.NewPlanController(planService)
+	authHandler := auth.NewControllerWire(db, cfg)
+	tenantHandler := handlers2.NewControllerWire(db)
+	productHandler := product.NewControllerWire(db)
+	planHandler := plan.NewControllerWire(db)
 
 	app := &App{
 		AuthHandler:    authHandler,

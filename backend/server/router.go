@@ -1,6 +1,7 @@
 package server
 
 import (
+	"backend/core/health"
 	appInit "backend/init"
 	"backend/internal/middleware"
 	"gorm.io/gorm"
@@ -9,6 +10,8 @@ import (
 )
 
 func SetupRoutes(router *fiber.App, app *appInit.App, db *gorm.DB) {
+
+	health.RegisterHealth(router)
 	// API version 1
 	api := router.Group("/api/v1")
 

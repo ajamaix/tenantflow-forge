@@ -6,44 +6,44 @@ import (
 )
 
 type Config struct {
-	Environment     string
-	DBHost          string
-	DBPort          string
-	DBUser          string
-	DBPassword      string
-	DBName          string
-	DBSSLMode       string
-	JWTSecret       string
-	SuperJWTSecret  string
-	JWTExpireHours  int
-	Port            string
-	AllowOrigins    string
-	SMTPHost        string
-	SMTPPort        int
-	SMTPUser        string
-	SMTPPass        string
-	SendRealEmail   bool
+	Environment    string
+	DBHost         string
+	DBPort         string
+	DBUser         string
+	DBPassword     string
+	DBName         string
+	DBSSLMode      string
+	JWTSecret      string
+	SuperJWTSecret string
+	JWTExpireHours int
+	Port           string
+	AllowOrigins   string
+	SMTPHost       string
+	SMTPPort       int
+	SMTPUser       string
+	SMTPPass       string
+	SendRealEmail  bool
 }
 
 func LoadConfig() *Config {
 	return &Config{
-		Environment:     getEnv("ENVIRONMENT", "development"),
-		DBHost:          getEnv("DB_HOST", "localhost"),
-		DBPort:          getEnv("DB_PORT", "5432"),
-		DBUser:          getEnv("DB_USER", "postgres"),
-		DBPassword:      getEnv("DB_PASSWORD", ""),
-		DBName:          getEnv("DB_NAME", "saas_db"),
-		DBSSLMode:       getEnv("DB_SSL_MODE", "disable"),
-		JWTSecret:       getEnv("JWT_SECRET", "your-jwt-secret-key"),
-		SuperJWTSecret:  getEnv("SUPER_JWT_SECRET", "your-super-jwt-secret-key"),
-		JWTExpireHours:  getIntEnv("JWT_EXPIRE_HOURS", 24),
-		Port:            getEnv("PORT", "8080"),
-		AllowOrigins:    getEnv("ALLOW_ORIGINS", "*"),
-		SMTPHost:        getEnv("SMTP_HOST", "localhost"),
-		SMTPPort:        getIntEnv("SMTP_PORT", 587),
-		SMTPUser:        getEnv("SMTP_USER", ""),
-		SMTPPass:        getEnv("SMTP_PASS", ""),
-		SendRealEmail:   getBoolEnv("SEND_REAL_EMAIL", false),
+		Environment:    getEnv("ENVIRONMENT", "development"),
+		DBHost:         getEnv("DB_HOST", "localhost"),
+		DBPort:         getEnv("DB_PORT", "5432"),
+		DBUser:         getEnv("DB_USER", "postgres"),
+		DBPassword:     getEnv("DB_PASSWORD", "password"),
+		DBName:         getEnv("DB_NAME", "saas_local"),
+		DBSSLMode:      getEnv("DB_SSL_MODE", "disable"),
+		JWTSecret:      getEnv("JWT_SECRET", "your-jwt-secret-key"),
+		SuperJWTSecret: getEnv("SUPER_JWT_SECRET", "your-super-jwt-secret-key"),
+		JWTExpireHours: getIntEnv("JWT_EXPIRE_HOURS", 24),
+		Port:           getEnv("PORT", "8080"),
+		AllowOrigins:   getEnv("ALLOW_ORIGINS", "*"),
+		SMTPHost:       getEnv("SMTP_HOST", "localhost"),
+		SMTPPort:       getIntEnv("SMTP_PORT", 587),
+		SMTPUser:       getEnv("SMTP_USER", ""),
+		SMTPPass:       getEnv("SMTP_PASS", ""),
+		SendRealEmail:  getBoolEnv("SEND_REAL_EMAIL", false),
 	}
 }
 
