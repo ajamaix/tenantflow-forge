@@ -1,11 +1,11 @@
 package handlers
 
 import (
+	"backend/internal/services"
+	"backend/models"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"saas-backend/internal/models"
-	"saas-backend/internal/services"
 )
 
 type TenantHandler struct {
@@ -16,7 +16,21 @@ func NewTenantHandler(tenantService services.TenantService) *TenantHandler {
 	return &TenantHandler{tenantService: tenantService}
 }
 
-// CreateTenant creates a new tenant
+func (h *TenantHandler) GetTenants(c *fiber.Ctx) error {
+	tenants, err := h.tenantService.GetAllTenants()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"error": false,
+		"data":  tenants,
+	})
+}
+
 func (h *TenantHandler) CreateTenant(c *fiber.Ctx) error {
 	var req models.CreateTenantRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -35,31 +49,13 @@ func (h *TenantHandler) CreateTenant(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"data":    tenant,
+		"error": false,
+		"data":  tenant,
 	})
 }
 
-// GetTenants retrieves all tenants
-func (h *TenantHandler) GetTenants(c *fiber.Ctx) error {
-	tenants, err := h.tenantService.GetAllTenants()
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": "Failed to retrieve tenants",
-		})
-	}
-
-	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    tenants,
-	})
-}
-
-// GetTenant retrieves a specific tenant
 func (h *TenantHandler) GetTenant(c *fiber.Ctx) error {
-	idStr := c.Params("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -76,15 +72,13 @@ func (h *TenantHandler) GetTenant(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    tenant,
+		"error": false,
+		"data":  tenant,
 	})
 }
 
-// UpdateTenant updates a tenant
 func (h *TenantHandler) UpdateTenant(c *fiber.Ctx) error {
-	idStr := c.Params("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -109,15 +103,13 @@ func (h *TenantHandler) UpdateTenant(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    tenant,
+		"error": false,
+		"data":  tenant,
 	})
 }
 
-// DeleteTenant deletes a tenant
 func (h *TenantHandler) DeleteTenant(c *fiber.Ctx) error {
-	idStr := c.Params("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
@@ -125,7 +117,8 @@ func (h *TenantHandler) DeleteTenant(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := h.tenantService.DeleteTenant(id); err != nil {
+	err = h.tenantService.DeleteTenant(id)
+	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   true,
 			"message": err.Error(),
@@ -133,7 +126,7 @@ func (h *TenantHandler) DeleteTenant(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
+		"error":   false,
 		"message": "Tenant deleted successfully",
 	})
 }

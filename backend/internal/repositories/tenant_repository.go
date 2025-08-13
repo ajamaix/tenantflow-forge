@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"saas-backend/internal/models"
+	"backend/models"
 
 	"gorm.io/gorm"
 )

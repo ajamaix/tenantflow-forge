@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: saas_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: saas_local
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - saas_network
+
+  # Backend API
+  backend:
+    build: .
+    container_name: saas_backend
+    env_file:
+      - .env.local
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=saas_local
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - saas_network
+    volumes:
+      - .:/app
+    command: go run main.go
+
+  # Redis (optional - for caching/sessions)
+  redis:
+    image: redis:7-alpine
+    container_name: saas_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - saas_network
+
+volumes:
+  postgres_data:
+
+networks:
+  saas_network:
+    driver: bridge

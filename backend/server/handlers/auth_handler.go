@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"backend/internal/services"
+	"backend/models"
+
 	"github.com/gofiber/fiber/v2"
-	"saas-backend/internal/models"
-	"saas-backend/internal/services"
 )
 
 type AuthHandler struct {
@@ -14,7 +15,6 @@ func NewAuthHandler(authService services.AuthService) *AuthHandler {
 	return &AuthHandler{authService: authService}
 }
 
-// Login handles user login
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var req models.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -24,13 +24,12 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	// Get tenant ID from context (for tenant-specific login)
+	// Get tenant ID from context
 	tenantID := c.Locals("tenantID")
 	var tenantIDPtr *int
 	if tenantID != nil {
-		if tid, ok := tenantID.(int); ok {
-			tenantIDPtr = &tid
-		}
+		id := tenantID.(int)
+		tenantIDPtr = &id
 	}
 
 	response, err := h.authService.Login(req.Email, req.Password, tenantIDPtr, false)
@@ -42,12 +41,11 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    response,
+		"error": false,
+		"data":  response,
 	})
 }
 
-// Register handles user registration
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	var req models.RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -61,9 +59,8 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	tenantID := c.Locals("tenantID")
 	var tenantIDPtr *int
 	if tenantID != nil {
-		if tid, ok := tenantID.(int); ok {
-			tenantIDPtr = &tid
-		}
+		id := tenantID.(int)
+		tenantIDPtr = &id
 	}
 
 	response, err := h.authService.Register(req, tenantIDPtr)
@@ -75,12 +72,11 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"data":    response,
+		"error": false,
+		"data":  response,
 	})
 }
 
-// SuperAdminLogin handles super admin login
 func (h *AuthHandler) SuperAdminLogin(c *fiber.Ctx) error {
 	var req models.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -99,7 +95,7 @@ func (h *AuthHandler) SuperAdminLogin(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    response,
+		"error": false,
+		"data":  response,
 	})
 }

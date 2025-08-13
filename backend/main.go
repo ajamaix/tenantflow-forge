@@ -9,31 +9,30 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 
-	"saas-backend/internal/app"
-	"saas-backend/internal/config"
-	"saas-backend/internal/database"
+	"backend/core"
+	"backend/init"
+	"backend/migrations"
+	"backend/server"
 )
 
 func main() {
 	// Load configuration
-	cfg := config.Load()
+	cfg := core.LoadConfig()
 
 	// Initialize database
-	db, err := database.Initialize(cfg.DatabaseURL)
+	db, err := core.InitializeDatabase(cfg.GetDatabaseURL())
 	if err != nil {
 		log.Fatal("Failed to initialize database:", err)
 	}
 
 	// Run migrations
-	if err := database.RunMigrations(db); err != nil {
+	if err := migrations.RunMigrations(db); err != nil {
 		log.Fatal("Failed to run migrations:", err)
 	}
 
-	// Seed dummy data if enabled
-	if cfg.UseDummyData {
-		if err := database.SeedDummyData(db); err != nil {
-			log.Printf("Warning: Failed to seed dummy data: %v", err)
-		}
+	// Seed initial data (roles, permissions, etc.)
+	if err := migrations.SeedInitialData(db); err != nil {
+		log.Printf("Warning: Failed to seed initial data: %v", err)
 	}
 
 	// Initialize Fiber app
@@ -61,14 +60,14 @@ func main() {
 	}))
 
 	// Initialize application
-	application, cleanup, err := app.InitializeApp(db, cfg)
+	application, cleanup, err := init.InitializeApp(db, cfg)
 	if err != nil {
 		log.Fatal("Failed to initialize application:", err)
 	}
 	defer cleanup()
 
 	// Setup routes
-	application.SetupRoutes(fiberApp)
+	server.SetupRoutes(fiberApp, application, db)
 
 	// Health check
 	fiberApp.Get("/health", func(c *fiber.Ctx) error {
