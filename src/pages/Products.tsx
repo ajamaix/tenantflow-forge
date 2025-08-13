@@ -45,8 +45,8 @@ const Products: React.FC = () => {
   const loadProducts = async () => {
     try {
       setIsLoading(true);
-      const data = await productApi.getAll();
-      setProducts(data);
+      const response = await productApi.getAll();
+      setProducts(response.data || []);
     } catch (error) {
       toast({
         title: "Error",
