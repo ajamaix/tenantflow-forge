@@ -8,12 +8,9 @@ import (
 	"gorm.io/gorm"
 )
 
-var AnalyticsSet = wire.NewSet(
-	ProvideAnalyticsRepository,
-	ProvideAnalyticsService,
-	ProvideAnalyticsController,
-)
-
-func InitializeAnalytics(db *gorm.DB) (*Controller, error) {
-	panic(wire.Build(AnalyticsSet))
+func NewControllerWire(db *gorm.DB) *Controller {
+	wire.Build(
+		ProviderSet,
+	)
+	return &Controller{}
 }

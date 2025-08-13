@@ -1,22 +1,23 @@
 package analytics
 
 import (
+	"backend/internal/domain"
 	"github.com/gofiber/fiber/v2"
 )
 
 type Controller struct {
-	service Service
+	service domain.AnalyticsService
 }
 
-func NewController(service Service) *Controller {
+func NewController(service domain.AnalyticsService) *Controller {
 	return &Controller{service: service}
 }
 
 // GetDashboardMetrics gets dashboard metrics for the current tenant
 func (c *Controller) GetDashboardMetrics(ctx *fiber.Ctx) error {
-	tenantID := ctx.Locals("tenant_id").(int)
+	tenantID := ctx.Locals("tenant_id").(*int)
 
-	metrics, err := c.service.GetDashboardMetrics(tenantID)
+	metrics, err := c.service.GetDashboardMetrics(*tenantID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,
@@ -32,9 +33,9 @@ func (c *Controller) GetDashboardMetrics(ctx *fiber.Ctx) error {
 
 // GetRecentActivity gets recent activity for the current tenant
 func (c *Controller) GetRecentActivity(ctx *fiber.Ctx) error {
-	tenantID := ctx.Locals("tenant_id").(int)
+	tenantID := ctx.Locals("tenant_id").(*int)
 
-	activities, err := c.service.GetRecentActivity(tenantID)
+	activities, err := c.service.GetRecentActivity(*tenantID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   true,

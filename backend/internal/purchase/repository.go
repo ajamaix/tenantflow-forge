@@ -1,41 +1,32 @@
 package purchase
 
 import (
-	"github.com/your-app/backend/models"
+	"backend/models"
 	"gorm.io/gorm"
 )
 
-type Repository interface {
-	CreatePurchase(purchase *models.Purchase) (*models.Purchase, error)
-	GetUserPurchases(userID, tenantID int) ([]models.Purchase, error)
-	GetPurchaseByID(id, userID, tenantID int) (*models.Purchase, error)
-	GetActivePurchases(userID, tenantID int) ([]models.Purchase, error)
-	GetPlanByID(planID, tenantID int) (*models.Plan, error)
-	CreateActivity(activity *models.Activity) error
-}
-
-type repository struct {
+type Repository struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) Repository {
-	return &repository{db: db}
+func NewRepository(db *gorm.DB) *Repository {
+	return &Repository{db: db}
 }
 
-func (r *repository) CreatePurchase(purchase *models.Purchase) (*models.Purchase, error) {
+func (r *Repository) CreatePurchase(purchase *models.Purchase) (*models.Purchase, error) {
 	if err := r.db.Create(purchase).Error; err != nil {
 		return nil, err
 	}
-	
+
 	// Preload relationships
 	if err := r.db.Preload("Plan.Product").Preload("User").First(purchase, purchase.ID).Error; err != nil {
 		return nil, err
 	}
-	
+
 	return purchase, nil
 }
 
-func (r *repository) GetUserPurchases(userID, tenantID int) ([]models.Purchase, error) {
+func (r *Repository) GetUserPurchases(userID, tenantID int) ([]models.Purchase, error) {
 	var purchases []models.Purchase
 	err := r.db.Where("user_id = ? AND tenant_id = ?", userID, tenantID).
 		Preload("Plan.Product").
@@ -45,7 +36,7 @@ func (r *repository) GetUserPurchases(userID, tenantID int) ([]models.Purchase, 
 	return purchases, err
 }
 
-func (r *repository) GetPurchaseByID(id, userID, tenantID int) (*models.Purchase, error) {
+func (r *Repository) GetPurchaseByID(id, userID, tenantID int) (*models.Purchase, error) {
 	var purchase models.Purchase
 	err := r.db.Where("id = ? AND user_id = ? AND tenant_id = ?", id, userID, tenantID).
 		Preload("Plan.Product").
@@ -54,7 +45,7 @@ func (r *repository) GetPurchaseByID(id, userID, tenantID int) (*models.Purchase
 	return &purchase, err
 }
 
-func (r *repository) GetActivePurchases(userID, tenantID int) ([]models.Purchase, error) {
+func (r *Repository) GetActivePurchases(userID, tenantID int) ([]models.Purchase, error) {
 	var purchases []models.Purchase
 	err := r.db.Where("user_id = ? AND tenant_id = ? AND status = ?", userID, tenantID, "active").
 		Preload("Plan.Product").
@@ -64,7 +55,7 @@ func (r *repository) GetActivePurchases(userID, tenantID int) ([]models.Purchase
 	return purchases, err
 }
 
-func (r *repository) GetPlanByID(planID, tenantID int) (*models.Plan, error) {
+func (r *Repository) GetPlanByID(planID, tenantID int) (*models.Plan, error) {
 	var plan models.Plan
 	err := r.db.Where("id = ? AND tenant_id = ?", planID, tenantID).
 		Preload("Product").
@@ -72,6 +63,6 @@ func (r *repository) GetPlanByID(planID, tenantID int) (*models.Plan, error) {
 	return &plan, err
 }
 
-func (r *repository) CreateActivity(activity *models.Activity) error {
+func (r *Repository) CreateActivity(activity *models.Activity) error {
 	return r.db.Create(activity).Error
 }

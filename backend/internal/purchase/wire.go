@@ -8,12 +8,9 @@ import (
 	"gorm.io/gorm"
 )
 
-var PurchaseSet = wire.NewSet(
-	ProvidePurchaseRepository,
-	ProvidePurchaseService,
-	ProvidePurchaseController,
-)
-
-func InitializePurchase(db *gorm.DB) (*Controller, error) {
-	panic(wire.Build(PurchaseSet))
+func NewControllerWire(db *gorm.DB) *Controller {
+	wire.Build(
+		ProviderSet,
+	)
+	return &Controller{}
 }

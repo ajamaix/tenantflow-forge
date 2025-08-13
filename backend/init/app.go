@@ -2,19 +2,23 @@ package init
 
 import (
 	"backend/core"
+	"backend/internal/analytics"
 	"backend/internal/auth"
 	"backend/internal/plan"
 	"backend/internal/product"
+	"backend/internal/purchase"
 	handlers2 "backend/internal/tenant"
 	"gorm.io/gorm"
 )
 
 type App struct {
-	AuthHandler    *auth.Controller
-	TenantHandler  *handlers2.Controller
-	ProductHandler *product.Controller
-	PlanHandler    *plan.Controller
-	Config         *core.Config
+	AuthHandler      *auth.Controller
+	TenantHandler    *handlers2.Controller
+	ProductHandler   *product.Controller
+	PlanHandler      *plan.Controller
+	PurchaseHandler  *purchase.Controller
+	AnalyticsHandler *analytics.Controller
+	Config           *core.Config
 }
 
 func InitializeApp(db *gorm.DB, cfg *core.Config) (*App, func(), error) {

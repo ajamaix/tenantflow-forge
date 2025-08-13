@@ -33,3 +33,15 @@ type AuthService interface {
 	HashPassword(password string) (string, error)
 	ComparePassword(hashedPassword, password string) error
 }
+
+type AnalyticsService interface {
+	GetDashboardMetrics(tenantID int) (*models.DashboardMetrics, error)
+	GetRecentActivity(tenantID int) ([]models.Activity, error)
+}
+
+type PurchaseService interface {
+	CreatePurchase(userID, tenantID int, req models.CreatePurchaseRequest) (*models.Purchase, error)
+	GetUserPurchases(userID, tenantID int) ([]models.Purchase, error)
+	GetPurchaseByID(id, userID, tenantID int) (*models.Purchase, error)
+	GetActivePurchases(userID, tenantID int) ([]models.Purchase, error)
+}

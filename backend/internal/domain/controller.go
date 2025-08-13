@@ -32,3 +32,21 @@ type AuthControllerInterface interface {
 	Register(c *fiber.Ctx) error
 	SuperAdminLogin(c *fiber.Ctx) error
 }
+
+type AnalyticsControllerInterface interface {
+	GetDashboardMetrics(ctx *fiber.Ctx) error
+	GetRecentActivity(ctx *fiber.Ctx) error
+}
+
+type PurchaseControllerInterface interface {
+	// CreatePurchase creates a new purchase
+	CreatePurchase(ctx *fiber.Ctx) error
+	// GetUserPurchases gets all purchases for the current user
+	GetUserPurchases(ctx *fiber.Ctx) error
+
+	// GetPurchaseByID gets a specific purchase by ID
+	GetPurchaseByID(ctx *fiber.Ctx) error
+
+	// GetActivePurchases gets all active purchases for the current user
+	GetActivePurchases(ctx *fiber.Ctx) error
+}

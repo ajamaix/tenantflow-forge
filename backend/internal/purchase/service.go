@@ -1,28 +1,21 @@
 package purchase
 
 import (
+	"backend/internal/domain"
+	"backend/models"
 	"fmt"
 	"time"
-
-	"github.com/your-app/backend/models"
 )
 
-type Service interface {
-	CreatePurchase(userID, tenantID int, req models.CreatePurchaseRequest) (*models.Purchase, error)
-	GetUserPurchases(userID, tenantID int) ([]models.Purchase, error)
-	GetPurchaseByID(id, userID, tenantID int) (*models.Purchase, error)
-	GetActivePurchases(userID, tenantID int) ([]models.Purchase, error)
+type Service struct {
+	repo domain.PurchaseRepository
 }
 
-type service struct {
-	repo Repository
+func NewService(repo domain.PurchaseRepository) *Service {
+	return &Service{repo: repo}
 }
 
-func NewService(repo Repository) Service {
-	return &service{repo: repo}
-}
-
-func (s *service) CreatePurchase(userID, tenantID int, req models.CreatePurchaseRequest) (*models.Purchase, error) {
+func (s *Service) CreatePurchase(userID, tenantID int, req models.CreatePurchaseRequest) (*models.Purchase, error) {
 	// Get plan details
 	plan, err := s.repo.GetPlanByID(req.PlanID, tenantID)
 	if err != nil {
@@ -72,14 +65,14 @@ func (s *service) CreatePurchase(userID, tenantID int, req models.CreatePurchase
 	return createdPurchase, nil
 }
 
-func (s *service) GetUserPurchases(userID, tenantID int) ([]models.Purchase, error) {
+func (s *Service) GetUserPurchases(userID, tenantID int) ([]models.Purchase, error) {
 	return s.repo.GetUserPurchases(userID, tenantID)
 }
 
-func (s *service) GetPurchaseByID(id, userID, tenantID int) (*models.Purchase, error) {
+func (s *Service) GetPurchaseByID(id, userID, tenantID int) (*models.Purchase, error) {
 	return s.repo.GetPurchaseByID(id, userID, tenantID)
 }
 
-func (s *service) GetActivePurchases(userID, tenantID int) ([]models.Purchase, error) {
+func (s *Service) GetActivePurchases(userID, tenantID int) ([]models.Purchase, error) {
 	return s.repo.GetActivePurchases(userID, tenantID)
 }

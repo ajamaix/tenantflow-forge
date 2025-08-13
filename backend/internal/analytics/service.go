@@ -1,25 +1,20 @@
 package analytics
 
 import (
+	"backend/internal/domain"
+	"backend/models"
 	"time"
-
-	"github.com/your-app/backend/models"
 )
 
-type Service interface {
-	GetDashboardMetrics(tenantID int) (*models.DashboardMetrics, error)
-	GetRecentActivity(tenantID int) ([]models.Activity, error)
+type Service struct {
+	repo domain.AnalyticsRepository
 }
 
-type service struct {
-	repo Repository
+func NewService(repo domain.AnalyticsRepository) *Service {
+	return &Service{repo: repo}
 }
 
-func NewService(repo Repository) Service {
-	return &service{repo: repo}
-}
-
-func (s *service) GetDashboardMetrics(tenantID int) (*models.DashboardMetrics, error) {
+func (s *Service) GetDashboardMetrics(tenantID int) (*models.DashboardMetrics, error) {
 	// Get current month metrics
 	now := time.Now()
 	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
@@ -78,6 +73,6 @@ func (s *service) GetDashboardMetrics(tenantID int) (*models.DashboardMetrics, e
 	}, nil
 }
 
-func (s *service) GetRecentActivity(tenantID int) ([]models.Activity, error) {
+func (s *Service) GetRecentActivity(tenantID int) ([]models.Activity, error) {
 	return s.repo.GetRecentActivity(tenantID, 10) // Get last 10 activities
 }

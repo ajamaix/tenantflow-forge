@@ -1,18 +1,17 @@
 package analytics
 
 import (
-	"github.com/your-app/backend/internal/analytics"
-	"gorm.io/gorm"
+	"backend/internal/domain"
+	"github.com/google/wire"
 )
 
-func ProvideAnalyticsRepository(db *gorm.DB) analytics.Repository {
-	return analytics.NewRepository(db)
-}
+// ProviderSet defines the set of providers for dependency injection
+var ProviderSet = wire.NewSet(
+	NewController,
+	NewService,
+	NewRepository,
 
-func ProvideAnalyticsService(repo analytics.Repository) analytics.Service {
-	return analytics.NewService(repo)
-}
-
-func ProvideAnalyticsController(service analytics.Service) *analytics.Controller {
-	return analytics.NewController(service)
-}
+	wire.Bind(new(domain.AnalyticsControllerInterface), new(*Controller)),
+	wire.Bind(new(domain.AnalyticsService), new(*Service)),
+	wire.Bind(new(domain.AnalyticsRepository), new(*Repository)),
+)

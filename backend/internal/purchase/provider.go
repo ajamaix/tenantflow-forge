@@ -1,18 +1,17 @@
 package purchase
 
 import (
-	"github.com/your-app/backend/internal/purchase"
-	"gorm.io/gorm"
+	"backend/internal/domain"
+	"github.com/google/wire"
 )
 
-func ProvidePurchaseRepository(db *gorm.DB) purchase.Repository {
-	return purchase.NewRepository(db)
-}
+// ProviderSet defines the set of providers for dependency injection
+var ProviderSet = wire.NewSet(
+	NewController,
+	NewService,
+	NewRepository,
 
-func ProvidePurchaseService(repo purchase.Repository) purchase.Service {
-	return purchase.NewService(repo)
-}
-
-func ProvidePurchaseController(service purchase.Service) *purchase.Controller {
-	return purchase.NewController(service)
-}
+	wire.Bind(new(domain.PurchaseControllerInterface), new(*Controller)),
+	wire.Bind(new(domain.PurchaseService), new(*Service)),
+	wire.Bind(new(domain.PurchaseRepository), new(*Repository)),
+)

@@ -1,6 +1,9 @@
 package domain
 
-import "backend/models"
+import (
+	"backend/models"
+	"time"
+)
 
 type PlanRepository interface {
 	Create(plan *models.Plan) error
@@ -36,4 +39,22 @@ type UserRepository interface {
 	Update(user *models.User) error
 	Delete(id int) error
 	GetByTenant(tenantID int) ([]models.User, error)
+}
+
+type AnalyticsRepository interface {
+	GetProductCount(tenantID int) (int, error)
+	GetActivePlanCount(tenantID int) (int, error)
+	GetTeamMemberCount(tenantID int) (int, error)
+	GetRevenueForPeriod(tenantID int, start, end time.Time) (float64, error)
+	GetActivePurchaseCount(tenantID int) (int, error)
+	GetRecentActivity(tenantID int, limit int) ([]models.Activity, error)
+}
+
+type PurchaseRepository interface {
+	CreatePurchase(purchase *models.Purchase) (*models.Purchase, error)
+	GetUserPurchases(userID, tenantID int) ([]models.Purchase, error)
+	GetPurchaseByID(id, userID, tenantID int) (*models.Purchase, error)
+	GetActivePurchases(userID, tenantID int) ([]models.Purchase, error)
+	GetPlanByID(planID, tenantID int) (*models.Plan, error)
+	CreateActivity(activity *models.Activity) error
 }
