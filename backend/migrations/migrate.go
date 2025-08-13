@@ -19,6 +19,7 @@ func RunMigrations(db *gorm.DB) error {
 		&models.Permission{},
 		&models.RolePermission{},
 		&models.Purchase{},
+		&models.Activity{},
 	)
 
 	if err != nil {
