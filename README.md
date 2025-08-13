@@ -1,73 +1,190 @@
-# Welcome to your Lovable project
+# Multi-Tenant SaaS Platform
 
-## Project info
+A professional React frontend for a multi-tenant SaaS application built for managing products and pricing plans. This application demonstrates modern SaaS architecture with role-based access control, tenant isolation, and beautiful UI design.
 
-**URL**: https://lovable.dev/projects/af3eafd0-2bc2-454f-b9d7-f3340d9ee8a5
+## 🌟 Features
 
-## How can I edit this code?
+### Multi-Tenancy
+- **Subdomain-based tenant routing** (e.g., `tenant123.localhost:3000`)
+- **Tenant-specific data isolation**
+- **Dynamic tenant detection and context**
 
-There are several ways of editing your application.
+### Authentication & Authorization
+- **JWT-based authentication**
+- **Role-Based Access Control (RBAC)**
+- **Super Admin portal** for system management
+- **Tenant portal** for business operations
 
-**Use Lovable**
+### Core Functionality
+- **Product Management**: Create, edit, and manage product offerings
+- **Pricing Plans**: Define pricing strategies with features and billing intervals
+- **Team Management**: Invite and manage team members
+- **Analytics Dashboard**: Monitor business metrics and performance
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/af3eafd0-2bc2-454f-b9d7-f3340d9ee8a5) and start prompting.
+### Design System
+- **Professional SaaS aesthetic** inspired by Stripe, Linear, and Notion
+- **Responsive design** with Tailwind CSS
+- **Consistent component library** using shadcn/ui
+- **Smooth animations** and micro-interactions
+- **Dark/light mode support**
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Demo Credentials
 
-**Use your preferred IDE**
+### Super Admin Portal
+- **URL**: `/super-admin/login`
+- **Email**: `admin@saas.com`
+- **Password**: `admin123`
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Tenant Portal
+- **URL**: `/login`
+- **Email**: Any valid email format
+- **Password**: Any password with length > 3
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🏗️ Architecture
 
-Follow these steps:
+### Frontend Structure
+```
+src/
+├── components/           # Reusable UI components
+│   ├── Auth/            # Authentication forms
+│   ├── Layout/          # Layout components
+│   └── ui/              # shadcn/ui components
+├── contexts/            # React Context providers
+│   └── AuthContext.tsx  # Authentication state management
+├── pages/               # Page components
+│   ├── Dashboard.tsx    # Tenant dashboard
+│   ├── SuperAdmin.tsx   # Super admin portal
+│   └── Products.tsx     # Product management
+├── hooks/               # Custom React hooks
+├── lib/                 # Utility functions
+└── App.tsx              # Main application component
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Key Technologies
+- **React 18** with TypeScript
+- **React Router** for navigation
+- **Tailwind CSS** for styling
+- **shadcn/ui** for component library
+- **Lucide React** for icons
+- **React Query** for data fetching
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🎨 Design System
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Color Palette
+- **Primary**: Professional blue (`hsl(221 83% 53%)`)
+- **Accent**: Purple for premium features (`hsl(259 94% 51%)`)
+- **Success**: Green for positive actions (`hsl(142 76% 36%)`)
+- **Warning**: Orange for attention (`hsl(38 92% 50%)`)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Components
+- **Gradient backgrounds** for premium feel
+- **Card-based layouts** for content organization
+- **Smooth transitions** for interaction feedback
+- **Professional typography** with Inter font
+
+## 🔐 Multi-Tenant Architecture
+
+### Tenant Detection
+```typescript
+// Extract tenant from subdomain
+const tenantDomain = window.location.hostname.split('.')[0];
+
+// Map to tenant context
+const tenant = {
+  id: 1,
+  name: 'Demo Company',
+  domain: tenantDomain
+};
+```
+
+### Role-Based Access
+```typescript
+interface User {
+  id: string;
+  email: string;
+  role: 'super_admin' | 'admin' | 'user';
+  tenant_id?: number;
+}
+```
+
+### Route Protection
+- **Public routes**: Login, Register
+- **Protected routes**: Dashboard, Products, Plans
+- **Super admin routes**: Tenant management, System analytics
+
+## 🔄 Backend Integration
+
+This frontend is designed to work with a Go backend featuring:
+
+### API Endpoints
+```
+# Authentication
+POST /api/v1/auth/login
+POST /api/v1/auth/register
+POST /api/super-auth/login
+
+# Products & Plans
+GET|POST|PUT|DELETE /api/v1/products
+GET|POST|PUT|DELETE /api/v1/products/:id/plans
+
+# Super Admin
+GET|POST|PUT|DELETE /api/super/tenants
+```
+
+### Multi-Tenant Middleware
+- **Subdomain extraction**: Maps `tenant123.localhost` to `tenant_id`
+- **Data isolation**: All queries filtered by `tenant_id`
+- **JWT validation**: Role-based route protection
+
+## 🎯 Usage
+
+### For Tenants
+1. **Access subdomain**: Navigate to `{tenant}.localhost:3000`
+2. **Login/Register**: Use tenant-specific credentials
+3. **Manage Products**: Create and organize product offerings
+4. **Set Pricing**: Define plans with features and billing
+5. **Monitor Analytics**: Track business performance
+
+### For Super Admins
+1. **Access portal**: Navigate to `/super-admin/login`
+2. **Manage Tenants**: Create, edit, and monitor tenant organizations
+3. **System Overview**: Monitor platform-wide metrics
+4. **User Management**: Handle cross-tenant operations
+
+## 🛠️ Development
+
+### Local Setup
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Environment Configuration
+```bash
+# Backend API endpoint
+VITE_API_URL=http://localhost:8080
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+# Enable development features
+VITE_ENV=development
+```
 
-**Use GitHub Codespaces**
+### Building for Production
+```bash
+npm run build
+npm run preview
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🔮 Future Enhancements
 
-## What technologies are used for this project?
+- **Real-time notifications** with WebSocket integration
+- **Advanced analytics** with charts and reporting
+- **File upload** for product images and assets
+- **API documentation** integration
+- **Subscription billing** with payment gateway
+- **Custom domains** for tenant branding
 
-This project is built with:
+## 📝 Notes
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+This is a frontend-only implementation designed to demonstrate the complete SaaS architecture. The backend API calls are currently mocked for demonstration purposes. In a production environment, replace the mock API functions in `AuthContext.tsx` with actual HTTP requests to your Go backend.
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/af3eafd0-2bc2-454f-b9d7-f3340d9ee8a5) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+The application showcases modern React patterns, professional UI design, and comprehensive SaaS functionality that would integrate seamlessly with the specified Go backend architecture.

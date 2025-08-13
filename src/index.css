@@ -1,42 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* SaaS Design System - Professional multi-tenant platform */
 
 @layer base {
   :root {
+    /* Core backgrounds */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-
+    
+    /* Professional SaaS color palette */
+    --primary: 221 83% 53%; /* Professional blue */
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 221 83% 48%;
+    --primary-light: 221 83% 95%;
+    
+    /* Purple accent for premium features */
+    --accent: 259 94% 51%;
+    --accent-foreground: 210 40% 98%;
+    --accent-hover: 259 94% 46%;
+    --accent-light: 259 94% 95%;
+    
+    /* Success colors for positive actions */
+    --success: 142 76% 36%;
+    --success-foreground: 210 40% 98%;
+    --success-light: 142 76% 95%;
+    
+    /* Warning colors */
+    --warning: 38 92% 50%;
+    --warning-foreground: 222.2 84% 4.9%;
+    --warning-light: 38 92% 95%;
+    
+    /* Card and surface colors */
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
+    --card-hover: 220 14% 96%;
+    
+    /* Secondary colors */
+    --secondary: 220 14% 96%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
+    
+    /* Muted colors for subtle elements */
+    --muted: 220 14% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
+    
+    /* Destructive colors */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
+    
+    /* Border and input colors */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 221 83% 53%;
+    
+    /* Gradients for premium feel */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    --gradient-subtle: linear-gradient(135deg, hsl(var(--primary-light)), hsl(var(--accent-light)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    
+    /* Shadows for depth */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    
+    /* Animation variables */
+    --transition-fast: 150ms ease-in-out;
+    --transition-smooth: 300ms ease-in-out;
+    --transition-slow: 500ms ease-in-out;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +136,62 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter;
   }
+}
+
+@layer components {
+  /* SaaS Component Styles */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-subtle {
+    background: var(--gradient-subtle);
+  }
+  
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .shadow-custom {
+    box-shadow: var(--shadow-md);
+  }
+  
+  .shadow-card {
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .transition-custom {
+    transition: var(--transition-smooth);
+  }
+  
+  /* Dashboard layout */
+  .dashboard-container {
+    @apply min-h-screen bg-muted/30;
+  }
+  
+  .dashboard-sidebar {
+    @apply bg-card border-r border-border shadow-custom;
+  }
+  
+  .dashboard-content {
+    @apply flex-1 p-6 space-y-6;
+  }
+  
+  /* Card components */
+  .saas-card {
+    @apply bg-card rounded-lg border border-border shadow-card p-6 transition-custom hover:shadow-xl;
+  }
+  
+  .metric-card {
+    @apply saas-card hover:bg-card-hover cursor-pointer;
+  }
+  
+  /* Form styles */
+  .auth-form {
+    @apply bg-card p-8 rounded-xl shadow-xl border border-border;
+  }
+  
+  /* Button variants will be defined in button component */
 }
