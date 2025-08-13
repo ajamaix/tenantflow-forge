@@ -2,7 +2,7 @@
 export const appConfig = {
   // Backend API configuration
   api: {
-    baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://669ed5b71fe5.ngrok-free.app',
+    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8085',
     timeout: 30000,
   },
   
